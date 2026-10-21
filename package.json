@@ -1,0 +1,17 @@
+{
+  "name": "talkbridge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "即時口譯、翻譯字幕、會議逐字稿與語言練習的瀏覽器 App (PWA)",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "node tests/e2e/browser.mjs",
+    "shots": "node tests/e2e/browser.mjs --shots",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

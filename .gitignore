@@ -1,0 +1,32 @@
+# Secrets / credentials
+.env
+.env.*
+!.env.example
+**/*credentials*.json
+**/*secrets*.json
+*.key
+
+# Dependencies and tooling
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+test-results/
+playwright-report/
+
+# Exported meeting data (never commit real recordings or transcripts)
+*.webm
+*.m4a
+*.ogg
+*.wav
+*.mp3
+TalkBridge_*.txt
+TalkBridge_*.md
+TalkBridge_*.srt
+TalkBridge_*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

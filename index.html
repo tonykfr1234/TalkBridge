@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TalkBridge 語橋</title>
+<meta name="description" content="即時口譯、字幕、會議逐字稿與語言練習的瀏覽器 App。">
+<meta name="theme-color" content="#0b7480">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-talk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M15 9h5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v3l-4-3h-3a2 2 0 0 1-2-2"/></symbol>
+  <symbol id="i-sub" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 13h5M13 13h5M6 16.5h8M16 16.5h2"/></symbol>
+  <symbol id="i-meet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M5 20c.8-3 3.6-5 7-5s6.2 2 7 5"/><path d="M5 7h.01M19 7h.01M3 11c0-1.5 1-2.5 2-2.5M21 11c0-1.5-1-2.5-2-2.5"/></symbol>
+  <symbol id="i-learn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-5 10 5-10 5z"/><path d="M6 10v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 8v6"/></symbol>
+  <symbol id="i-set" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l-4 4 4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" stroke-linecap="round"/></symbol>
+  <symbol id="i-slow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c0-4 3.5-7 8-7s7 3 7 6v1H3z"/><path d="M18 13h2a2 2 0 0 0 0-4h-1M6 15v3M14 15v3"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
+</svg>
+
+<div class="app">
+  <nav class="rail" role="tablist" aria-label="功能">
+    <div class="brand"><img src="assets/icon-192.png" alt="TalkBridge"></div>
+    <button class="tab" role="tab" data-view="talk" aria-selected="true"><svg><use href="#i-talk"/></svg>口譯</button>
+    <button class="tab" role="tab" data-view="subs" aria-selected="false"><svg><use href="#i-sub"/></svg>字幕</button>
+    <button class="tab" role="tab" data-view="meet" aria-selected="false"><svg><use href="#i-meet"/></svg>會議</button>
+    <button class="tab" role="tab" data-view="learn" aria-selected="false"><svg><use href="#i-learn"/></svg>練習</button>
+    <div class="spacer"></div>
+    <button class="tab" role="tab" data-view="settings" aria-selected="false"><svg><use href="#i-set"/></svg>設定</button>
+  </nav>
+
+  <main id="main">
+    <div id="support-banner" class="banner" hidden style="margin:16px max(16px, env(safe-area-inset-left, 0px)) 0"></div>
+
+    <!-- ===== 口譯 ===== -->
+    <section class="view" id="view-talk">
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">即時口譯</div>
+          <h1>說中文出英文，說英文出中文</h1>
+          <p class="lede">自動模式會偵測誰在說哪種語言，翻成另一種並唸出來。面對面時也可以按下自己那一邊的按鈕。</p>
+        </div>
+        <div class="mode-switch" role="group" aria-label="模式">
+          <button id="mode-auto" aria-pressed="true">自動偵測</button>
+          <button id="mode-manual" aria-pressed="false">按鍵輪流</button>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card stack">
+          <div class="pair">
+            <label class="field">我說<select id="my-lang"></select></label>
+            <button class="btn icon-btn swap" id="swap-lang" title="交換語言" aria-label="交換語言"><svg><use href="#i-swap"/></svg></button>
+            <label class="field">對方說<select id="their-lang"></select></label>
+          </div>
+          <div class="row small">
+            <label class="check"><input type="checkbox" id="speak-out"> 自動唸出翻譯</label>
+            <span class="muted" id="engine-note"></span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="thread" id="thread" aria-live="polite">
+            <p class="empty" id="thread-empty">按下方按鈕開始說話。翻譯會出現在這裡，點喇叭可以重聽。</p>
+          </div>
+          <p class="listening-line" id="talk-interim"></p>
+          <div class="talk" id="talk-auto">
+            <button class="talk-btn auto-btn" id="talk-auto-btn"><svg><use href="#i-mic"/></svg><span>開始自動口譯</span><small id="auto-hint">聽到中文就翻英文，聽到英文就翻中文</small></button>
+          </div>
+          <div class="talk" id="talk-manual" hidden>
+            <button class="talk-btn" id="talk-me"><svg><use href="#i-mic"/></svg><span id="talk-me-label">我說</span><small>按一下開始，再按一下停止</small></button>
+            <button class="talk-btn them" id="talk-them"><svg><use href="#i-mic"/></svg><span id="talk-them-label">對方說</span><small>按一下開始，再按一下停止</small></button>
+          </div>
+          <form class="typebar" id="type-form" style="margin-top:12px">
+            <input type="text" id="type-input" placeholder="也可以直接打字翻譯…" aria-label="輸入文字翻譯">
+            <button class="btn primary" type="submit">翻譯</button>
+          </form>
+        </div>
+        <div class="row">
+          <button class="btn ghost small" id="talk-clear"><svg><use href="#i-trash"/></svg>清除對話</button>
+          <button class="btn ghost small" id="talk-copy"><svg><use href="#i-copy"/></svg>複製對話</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 字幕 ===== -->
+    <section class="view" id="view-subs" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">即時翻譯字幕</div>
+          <h1>放在喇叭旁，影片和會議直接上中文字幕</h1>
+          <p class="lede">把手機或筆電放在電腦喇叭旁邊，或在 Windows 把「立體聲混音」設成麥克風，就能替線上會議、YouTube、直播即時加上翻譯字幕。</p>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card row">
+          <label class="field">聽到的語言<select id="sub-src"></select></label>
+          <label class="field">翻成<select id="sub-dst"></select></label>
+          <label class="field grow">字級 <input type="range" id="sub-size" min="24" max="96" step="2" aria-label="字級"></label>
+          <label class="check small"><input type="checkbox" id="sub-orig"> 顯示原文</label>
+          <label class="check small"><input type="checkbox" id="sub-top"> 字幕置頂</label>
+        </div>
+        <div class="sub-stage" id="sub-stage">
+          <div class="sub-badge" id="sub-badge" hidden><span class="pulse"></span><span id="sub-badge-text">聆聽中</span></div>
+          <div class="sub-tools">
+            <button class="btn small" id="sub-full"><svg><use href="#i-full"/></svg>全螢幕</button>
+          </div>
+          <div class="sub-history" id="sub-history"></div>
+          <div class="sub-line sub-current" id="sub-current">
+            <p class="sub-placeholder" id="sub-placeholder">按「開始字幕」後，聽到的話會在這裡變成翻譯字幕。</p>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="sub-start"><svg><use href="#i-mic"/></svg>開始字幕</button>
+          <button class="btn" id="sub-save" disabled><svg><use href="#i-down"/></svg>下載字幕檔 (.srt)</button>
+          <button class="btn ghost" id="sub-clear">清除</button>
+          <span class="muted small" id="sub-count"></span>
+        </div>
+        <div class="tipbox small">
+          <b>讓電腦直接「聽」系統聲音（Windows）：</b>控制台 → 聲音 → 錄製 → 在「立體聲混音（Stereo Mix）」按右鍵啟用並設為預設裝置；沒有這個項目可以安裝免費的 VB-Audio Virtual Cable。之後 Chrome 收到的麥克風聲音就是電腦播放的聲音，不受環境噪音影響。Mac 可用 BlackHole。
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 會議 ===== -->
+    <section class="view" id="view-meet" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">會議記錄</div>
+          <h1>錄音、逐字稿、中翻英、重點備忘一次完成</h1>
+          <p class="lede">開會時按下開始，逐字稿會即時出現。點選發言人標記是誰在說話（數字鍵 1–9 快速切換），會後一鍵整理重點、分析發言、匯出或分享到 LINE。</p>
+        </div>
+      </div>
+      <div class="meet-grid">
+        <div class="stack">
+          <div class="card stack" id="meet-live">
+            <div class="row">
+              <label class="field">會議語言<select id="meet-lang"></select></label>
+              <label class="field">同步翻譯成<select id="meet-tr"></select></label>
+              <label class="check small" style="align-self:flex-end"><input type="checkbox" id="meet-record"> 同時錄音</label>
+            </div>
+            <div class="recbar">
+              <button class="btn primary" id="meet-start"><svg><use href="#i-mic"/></svg>開始記錄</button>
+              <button class="btn" id="meet-pause" hidden><svg><use href="#i-pause"/></svg>暫停</button>
+              <button class="btn danger" id="meet-stop" hidden><svg><use href="#i-stop"/></svg>結束並儲存</button>
+              <span class="timer" id="meet-timer">00:00</span>
+              <span class="meter" title="收音音量"><i id="meet-level"></i></span>
+              <span class="small muted" id="meet-status"></span>
+            </div>
+            <div>
+              <div class="row" style="justify-content:space-between">
+                <span class="small muted">目前發言人（點選切換）</span>
+                <button class="btn ghost small" id="meet-add-speaker">＋ 新增發言人</button>
+              </div>
+              <div class="speakers" id="meet-speakers"></div>
+            </div>
+          </div>
+
+          <div class="card" id="meet-doc">
+            <div class="row" style="justify-content:space-between;margin-bottom:6px">
+              <input type="text" id="meet-title" class="grow" style="font-weight:700;font-size:17px;border-color:transparent;padding-left:0" aria-label="會議名稱">
+              <span class="small muted" id="meet-saved"></span>
+            </div>
+            <div class="subtabs" role="tablist">
+              <button role="tab" data-mtab="transcript" aria-selected="true">逐字稿</button>
+              <button role="tab" data-mtab="notes" aria-selected="false">重點備忘</button>
+              <button role="tab" data-mtab="speakers" aria-selected="false">發言分析</button>
+              <button role="tab" data-mtab="export" aria-selected="false">匯出與分享</button>
+            </div>
+            <div data-mpanel="transcript">
+              <div class="transcript" id="meet-transcript"></div>
+              <p class="muted small" id="meet-empty">還沒有內容。按「開始記錄」，或從右側開啟以前的會議。</p>
+            </div>
+            <div data-mpanel="notes" hidden class="notes">
+              <div class="row">
+                <label class="field">備忘語言<select id="sum-lang"></select></label>
+                <button class="btn primary" id="meet-summarize" style="align-self:flex-end"><svg><use href="#i-spark"/></svg>AI 整理重點</button>
+                <button class="btn" id="meet-local-sum" style="align-self:flex-end">離線快速整理</button>
+              </div>
+              <p class="small muted" id="sum-status"></p>
+              <div id="meet-notes"></div>
+            </div>
+            <div data-mpanel="speakers" hidden>
+              <div class="bars" id="meet-bars"></div>
+              <div class="row" style="margin-top:14px">
+                <button class="btn" id="meet-diarize"><svg><use href="#i-spark"/></svg>AI 依內容建議發言人</button>
+                <span class="small muted" id="diarize-status"></span>
+              </div>
+              <div id="meet-speaker-notes" style="margin-top:12px"></div>
+              <p class="small muted">單一麥克風無法從聲紋分辨人；這裡以你的手動標記為準，AI 只根據談話內容提出建議。</p>
+            </div>
+            <div data-mpanel="export" hidden class="stack">
+              <audio id="meet-audio" controls hidden></audio>
+              <div class="export-grid">
+                <button class="btn" data-export="txt"><svg><use href="#i-down"/></svg>逐字稿 .txt</button>
+                <button class="btn" data-export="md"><svg><use href="#i-down"/></svg>會議記錄 .md</button>
+                <button class="btn" data-export="srt"><svg><use href="#i-down"/></svg>字幕 .srt</button>
+                <button class="btn" data-export="json"><svg><use href="#i-down"/></svg>完整資料 .json</button>
+                <button class="btn" data-export="audio" id="export-audio"><svg><use href="#i-down"/></svg>錄音檔</button>
+              </div>
+              <div class="export-grid">
+                <button class="btn primary" id="share-files"><svg><use href="#i-share"/></svg>分享檔案（LINE 等）</button>
+                <a class="btn" id="share-line" target="_blank" rel="noopener"><svg><use href="#i-share"/></svg>用 LINE 傳送重點</a>
+                <button class="btn" id="share-copy"><svg><use href="#i-copy"/></svg>複製重點文字</button>
+              </div>
+              <p class="small muted">手機上按「分享檔案」會開啟系統分享選單，可直接選 LINE 傳送逐字稿與錄音檔。電腦版 LINE 不支援網頁分享，請先下載檔案再拖進聊天室。</p>
+            </div>
+          </div>
+        </div>
+        <aside class="card">
+          <h2>以前的會議</h2>
+          <div class="history" id="meet-history"></div>
+          <p class="small muted" id="history-empty">儲存的會議只放在這台裝置的瀏覽器裡。</p>
+          <button class="btn ghost small" id="meet-delete" hidden><svg><use href="#i-trash"/></svg>刪除目前這場會議</button>
+          <div id="meet-delete-confirm" hidden class="stack small" style="margin-top:8px">
+            <span>確定刪除？錄音與逐字稿都會移除。</span>
+            <div class="row"><button class="btn danger small" id="meet-delete-yes">刪除</button><button class="btn small" id="meet-delete-no">取消</button></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===== 練習 ===== -->
+    <section class="view" id="view-learn" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">語言練習</div>
+          <h1>商務與生活情境，一句一句練到開口</h1>
+          <p class="lede">聽標準發音、慢速跟讀，再對著麥克風說一次，系統會比對你說的內容並評分。熟練後用 AI 情境對話實戰。</p>
+        </div>
+        <div class="row">
+          <span class="stat"><b id="streak">0</b><span class="small muted">天連續練習</span></span>
+          <span class="stat"><b id="learned-count">0</b><span class="small muted">句已熟練</span></span>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="lang-tabs" id="learn-langs"></div>
+        <div class="subtabs" role="tablist">
+          <button role="tab" data-ltab="drill" aria-selected="true">情境跟讀</button>
+          <button role="tab" data-ltab="chat" aria-selected="false">AI 情境對話</button>
+          <button role="tab" data-ltab="guide" aria-selected="false">學習方法</button>
+        </div>
+        <div data-lpanel="drill" class="stack">
+          <div class="scen-grid" id="scenarios"></div>
+          <div class="row" id="thai-gender-row" hidden>
+            <span class="small muted">泰文口吻：</span>
+            <div class="mode-switch"><button id="th-male" aria-pressed="true">男生 ครับ</button><button id="th-female" aria-pressed="false">女生 ค่ะ</button></div>
+          </div>
+          <p class="small muted" id="voice-note"></p>
+          <div class="phrases" id="phrases"></div>
+        </div>
+        <div data-lpanel="chat" hidden class="card stack">
+          <div class="row">
+            <label class="field grow">情境<select id="chat-scenario"></select></label>
+            <button class="btn" id="chat-reset" style="align-self:flex-end">重新開始</button>
+          </div>
+          <div class="chat" id="chat"></div>
+          <p class="small muted" id="chat-status"></p>
+          <form class="typebar" id="chat-form">
+            <button class="btn icon-btn" type="button" id="chat-mic" title="用說的" aria-label="用說的"><svg><use href="#i-mic"/></svg></button>
+            <input type="text" id="chat-input" placeholder="用目標語言回答…" aria-label="你的回答">
+            <button class="btn primary" type="submit">送出</button>
+          </form>
+        </div>
+        <div data-lpanel="guide" hidden class="card guide" id="guide"></div>
+      </div>
+    </section>
+
+    <!-- ===== 設定 ===== -->
+    <section class="view" id="view-settings" hidden>
+      <div class="view-head"><div><div class="eyebrow">設定</div><h1>翻譯引擎、AI 與語音</h1></div></div>
+      <div class="settings-grid">
+        <div class="card stack">
+          <h2>Claude AI（選用）</h2>
+          <p class="small muted">填入 Anthropic API 金鑰後，可使用 AI 會議重點、發言分析、AI 情境對話，以及更準確的 AI 翻譯。金鑰只存在這台裝置的瀏覽器，只會傳給 api.anthropic.com。</p>
+          <label class="field">API 金鑰<input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off"></label>
+          <label class="field">模型<select id="model"></select></label>
+          <div class="row"><button class="btn" id="test-key">測試金鑰</button><button class="btn ghost" id="clear-key">清除金鑰</button><span class="small" id="key-status"></span></div>
+          <p class="keynote">在 console.anthropic.com 建立金鑰。用量會計入你的 Anthropic 帳戶。</p>
+        </div>
+        <div class="card stack">
+          <h2>翻譯引擎</h2>
+          <label class="check"><input type="radio" name="engine" value="web"> 免費網路翻譯（速度快，預設）</label>
+          <label class="check"><input type="radio" name="engine" value="ai"> Claude AI 翻譯（語氣自然，需要金鑰，較慢）</label>
+          <h2 style="margin-top:8px">語音</h2>
+          <label class="field">唸出速度 <input type="range" id="tts-rate" min="0.5" max="1.4" step="0.1"></label>
+          <button class="btn" id="tts-test"><svg><use href="#i-play"/></svg>試聽</button>
+          <h2 style="margin-top:8px">外觀</h2>
+          <div class="mode-switch" role="group" aria-label="外觀">
+            <button data-theme-set="" aria-pressed="true">跟隨系統</button>
+            <button data-theme-set="light" aria-pressed="false">淺色</button>
+            <button data-theme-set="dark" aria-pressed="false">深色</button>
+          </div>
+        </div>
+        <div class="card stack">
+          <h2>這台裝置支援的功能</h2>
+          <div class="support" id="support"></div>
+          <p class="small muted">語音辨識使用瀏覽器內建功能：Chrome、Edge（電腦與 Android）效果最好；iPhone 請用 Safari 並開啟「聽寫」。</p>
+          <button class="btn" id="install-btn" hidden>安裝到主畫面</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
