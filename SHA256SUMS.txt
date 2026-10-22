@@ -1,4 +1,4 @@
-5858aea9162c7a93312c93d0e1fd7296c8906d75caad30e1622af91923f28ac9  ./.gitattributes
+d7172d89e842aa804f3c2b1077c4f618714b47b3dd8c071aaa77cb85a8722c2f  ./.gitattributes
 a1c287c5af6e7e21a9b2591f10b44bcc373b75498bc4b87050df2e61f446be48  ./.github/workflows/android.yml
 35467adfc3787372b0ba8b028c8a9041f08009f84833273b74cfbcd8d230e7e1  ./.github/workflows/ci.yml
 e4db20c74d322e6c1f934fa42ee6a8ea01b88873f28f4c3b33a5ce6af0584964  ./.github/workflows/pages.yml
