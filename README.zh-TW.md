@@ -13,7 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT 授權"></a>
 </p>
 <p align="center">
-  <a href="#quick-start">快速開始</a> · <a href="#android">Android</a> · <a href="#features">功能</a> · <a href="#screenshots">畫面</a> · <a href="#how-it-works">運作原理</a> · <a href="#faq">常見問題</a> · <a href="#documentation">文件</a>
+  <a href="#quick-start">快速開始</a> · <a href="#android">Android</a> · <a href="#features">功能</a> · <a href="#demo">示範</a> · <a href="#how-it-works">運作原理</a> · <a href="#faq">常見問題</a> · <a href="#documentation">文件</a>
 </p>
 
 ```text
@@ -76,21 +76,24 @@ App 和網頁是同一套程式，包在原生外殼裡：改用 Android 系統�
 單一麥克風無法從聲紋分辨不同的人，所以發言人以你的標記為準；AI 建議是根據談話內容判斷，不是聲紋。
 
 <a id="screenshots"></a>
-## 畫面
+<a id="demo"></a>
+## 示範
 
-| 口譯 | 字幕 |
-| --- | --- |
-| <img src="docs/media/talk.png" alt="雙向口譯" width="420"> | <img src="docs/media/subtitles.png" alt="翻譯字幕" width="420"> |
-| **會議記錄** | **語言練習** |
-| <img src="docs/media/meeting.png" alt="會議記錄" width="420"> | <img src="docs/media/practice.png" alt="情境跟讀" width="420"> |
+這段約 90 秒、無聲的操作影片，是**在 Chromium 裡執行真正的 App，語音辨識為腳本輸入、翻譯為範例內容、AI 服務為模擬回應**。會議片段把三種合成人聲（其中兩位是聲音相近的男聲）播放進麥克風，所以自動分辨發言人是用真實聲音運作。每一步都有中英文字幕說明。這不是真實會議的錄影，也不代表辨識準確度。
 
-<p align="center"><img src="docs/media/speakers.png" alt="依聲音自動標出發言人，按 ✎ 改名" width="640"></p>
+![TalkBridge 操作示範](docs/media/talkbridge-demo.gif)
 
-<p align="center"><img src="docs/media/action-items.png" alt="待辦事項：負責人、期限、優先，缺漏以紅字標示" width="640"></p>
+[開啟或下載 MP4 示範影片](docs/media/talkbridge-demo.mp4)
 
-<p align="center"><img src="docs/media/phone-dark.png" alt="手機深色模式" width="220"></p>
+| 口譯 | 字幕 | 會議逐字稿 |
+| --- | --- | --- |
+| ![雙向口譯](docs/media/talk.png) | ![翻譯字幕](docs/media/subtitles.png) | ![依聲音分辨發言人的逐字稿](docs/media/meeting.png) |
+| **待辦事項** | **語言練習** | **設定** |
+| ![負責人、期限與優先順序](docs/media/action-items.png) | ![發音評分](docs/media/practice.png) | ![AI 服務與我的聲音](docs/media/settings.png) |
+| **依聲音分辨發言人** | **Android App** | **手機深色模式** |
+| ![依聲音標記發言人並可改名](docs/media/speakers.png) | ![Android App 與更新提示](docs/media/android.png) | ![手機深色模式](docs/media/phone-dark.png) |
 
-畫面由自動化瀏覽器測試產生，語音為模擬輸入、翻譯為範例內容（`npm run shots`）。
+用 `npm run demo` 可重新產生所有圖片與影片（見 [CONTRIBUTING.md](CONTRIBUTING.md#generated-demo-media)）。
 
 <a id="how-it-works"></a>
 ## 運作原理

@@ -36,7 +36,9 @@ TalkBridge는 휴대폰이나 노트북을 휴대용 통역사로 바꿉니다. 
 - 회의록: 녹음, 받아쓰기, 화자 표시(숫자 키 1–9), 동시 번역, AI 요약과 할 일, .txt/.md/.srt/.json/오디오 내보내기, LINE 공유
 - 언어 연습: 8개 상황 × 6문장(영어·베트남어·태국어), 발음 점수, 연속 학습일, AI 역할극, 학습 가이드
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 자세한 내용은 <a href="README.md">English README</a>를 참고하세요.
 

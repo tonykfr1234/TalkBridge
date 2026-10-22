@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = {'.git', 'node_modules', '__pycache__', '.venv', 'test-results', 'playwright-report', 'build', '.gradle', '.kotlin'}
-ALLOWED_MEDIA = re.compile(r'^(assets/icon-[\w-]+\.png|docs/media/[\w-]+\.png|android/app/src/main/res/[\w-]+/ic_launcher[\w-]*\.png)$')
+ALLOWED_MEDIA = re.compile(r'^(assets/icon-[\w-]+\.png|docs/media/[\w-]+\.(?:png|gif|mp4)|android/app/src/main/res/[\w-]+/ic_launcher[\w-]*\.png)$')
 ALLOWED_BINARY = {'android/gradle/wrapper/gradle-wrapper.jar'}
 MEDIA_SUFFIXES = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.mp4', '.webm', '.m4a', '.ogg', '.wav', '.mp3', '.mov'}
 FORBIDDEN_SUFFIXES = {'.log', '.zip', '.7z', '.rar', '.tar', '.gz', '.key', '.pem', '.p12', '.jks', '.keystore', '.apk', '.aab'}

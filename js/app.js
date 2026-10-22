@@ -50,7 +50,7 @@ function boot() {
       if (!u) return;
       const b = $('#support-banner');
       b.hidden = false;
-      b.innerHTML = `<b>有新版本 ${u.version}</b>　<button class="btn small primary" id="update-btn">下載更新</button> <span class="small muted">下載後點開安裝即可，資料會保留。</span>`;
+      b.innerHTML = `<div class="row"><b>有新版本 ${u.version}</b><button class="btn small primary" id="update-btn">下載更新</button></div><p class="small muted" style="margin:6px 0 0">下載後點開安裝即可，資料會保留。</p>`;
       $('#update-btn').addEventListener('click', () => openExternal(u.url));
     });
   }

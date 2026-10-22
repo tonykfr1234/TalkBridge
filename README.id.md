@@ -36,7 +36,9 @@ TalkBridge mengubah ponsel atau laptop menjadi juru bahasa saku: Anda berbicara 
 - Rapat: rekaman, transkrip, label pembicara (tombol 1–9), terjemahan paralel, notulen dan tugas AI, ekspor .txt/.md/.srt/.json/audio, berbagi ke LINE
 - Latihan: 8 skenario × 6 kalimat (Inggris, Vietnam, Thai), penilaian pelafalan, rangkaian harian, bermain peran AI, panduan belajar
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 Dokumentasi lengkap di <a href="README.md">README bahasa Inggris</a>.
 

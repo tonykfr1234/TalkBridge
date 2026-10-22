@@ -36,7 +36,9 @@ Le 12 lingue del README traducono la documentazione. L'interfaccia dell'app è a
 - Riunioni: registrazione, trascrizione, etichette dei relatori (tasti 1–9), traduzione parallela, verbale e attività con IA, esportazione .txt/.md/.srt/.json/audio, condivisione LINE
 - Pratica: 8 scenari × 6 frasi (inglese, vietnamita, thailandese), punteggio di pronuncia, serie giornaliera, gioco di ruolo IA, guide
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 Documentazione completa nel <a href="README.md">README inglese</a>.
 

@@ -36,7 +36,9 @@ TalkBridge biến điện thoại hoặc laptop thành phiên dịch viên bỏ 
 - Cuộc họp: ghi âm, ghi chép, gắn người nói (phím 1–9), dịch song song, biên bản và việc cần làm bằng AI, xuất .txt/.md/.srt/.json/âm thanh, chia sẻ LINE
 - Luyện tập: 8 tình huống × 6 câu (Anh, Việt, Thái), chấm điểm phát âm, chuỗi ngày luyện, nhập vai AI, hướng dẫn học
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 Tài liệu đầy đủ ở <a href="README.md">README tiếng Anh</a>.
 

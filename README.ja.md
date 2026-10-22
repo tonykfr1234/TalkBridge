@@ -36,7 +36,9 @@ TalkBridge はスマートフォンやノート PC をポケット通訳に変�
 - 議事録：録音、文字起こし、話者ラベル（数字キー 1–9）、同時翻訳、AI 要約と ToDo、.txt/.md/.srt/.json/音声の書き出し、LINE 共有
 - 語学練習：8 シーン × 6 文（英語・ベトナム語・タイ語）、発音採点、連続日数、AI ロールプレイ、学習ガイド
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 詳細は <a href="README.md">English README</a> をご覧ください。
 

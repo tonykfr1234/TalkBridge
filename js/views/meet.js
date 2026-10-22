@@ -587,7 +587,7 @@ function renderNotes() {
   const items = sortActions(upgradeActions(n.actionItems));
   if (items.length) {
     const missing = items.filter((a) => ownerLabel(a) === NO_OWNER || dueLabel(a) === NO_DUE || !a.dueDate).length;
-    box.append(h('h3', {}, `待辦事項（${items.length} 項）`));
+    box.append(h('h3', { class: 'actions-title' }, `待辦事項（${items.length} 項）`));
     if (missing) box.append(h('p', { class: 'small warn-note' }, `有 ${missing} 項缺負責人或明確日期，建議會後確認。`));
     box.append(h('div', { class: 'table-wrap' }, h('table', { class: 'actions' },
       h('thead', {}, h('tr', {}, h('th', {}, '負責人'), h('th', {}, '事項'), h('th', {}, '期限'), h('th', {}, '優先'))),

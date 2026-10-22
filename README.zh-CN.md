@@ -36,7 +36,9 @@ TalkBridge 把手机或笔记本变成随身口译员：你说中文，它用英
 - 会议记录：录音、实时转写、发言人标记（数字键 1–9）、同步翻译、AI 要点与待办、导出 .txt/.md/.srt/.json/音频、分享到 LINE
 - 语言练习：8 个情景 × 6 句（英语、越南语、泰语），发音评分、连续练习天数、AI 情景对话、学习方法
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 完整说明请见 <a href="README.md">English README</a> 与 <a href="README.zh-TW.md">繁體中文 README</a>。
 

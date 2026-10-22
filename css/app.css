@@ -238,7 +238,7 @@ audio { width: 100%; }
 .stat b { font-size: 22px; font-variant-numeric: tabular-nums; }
 
 /* ---------- Settings ---------- */
-.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
 .keynote { font-size: 12px; color: var(--muted); }
 .support { display: grid; gap: 6px; font-size: 14px; }
 .support .yes { color: var(--ok); font-weight: 700; } .support .no { color: var(--rec); font-weight: 700; }

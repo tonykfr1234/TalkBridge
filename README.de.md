@@ -36,7 +36,9 @@ Die 12 README-Sprachen übersetzen die Dokumentation. Die App-Oberfläche ist de
 - Besprechungen: Aufnahme, Transkript, Sprecherlabels (Tasten 1–9), Parallelübersetzung, KI-Protokoll und Aufgaben, Export als .txt/.md/.srt/.json/Audio, Teilen über LINE
 - Sprachtraining: 8 Szenarien × 6 Sätze (Englisch, Vietnamesisch, Thai), Aussprachebewertung, Lernserie, KI-Rollenspiel, Lerntipps
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 Ausführliche Dokumentation im <a href="README.md">englischen README</a>.
 

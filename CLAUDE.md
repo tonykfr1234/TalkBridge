@@ -4,9 +4,11 @@
 - **每次修改完成後都要自動上傳 GitHub**，不需要再問：
   1. 跑測試：`python3 scripts/security_scan.py .`、`npm test`、`npm run test:e2e`；動到聲音或發言人相關程式時再跑 `npm run test:voices`（需要含 flite 的 ffmpeg）。動到 `android/` 的 Kotlin 時，至少確認能編譯。
   2. 使用者看得到的修改要更新 `CHANGELOG.md`（英文＋繁中各一段），並把 `package.json` 的 `version` 加一個小版號；`sw.js` 的 `VERSION` 一起改。
-  3. `python3 scripts/update_checksums.py` 更新 `SHA256SUMS.txt`。
-  4. commit 後 `git push origin main`。
-  5. 等 GitHub Actions 的 Security Scan and Tests、Deploy to GitHub Pages、Android App 都完成，確認成功再回報；失敗就修好再推。
+  3. **截圖、動畫、影片**：介面或功能有變動時執行 `npm run demo`，重新產生 `docs/media/` 的所有截圖（PNG）、示範影片（MP4）與動畫（GIF），自己逐張檢查，並用 SendUserFile 把**每一張實體圖片、GIF 與 MP4** 傳給使用者看，再一起 commit 上 GitHub。README 的「示範」區塊格式照 superlive-ai-monitor 等其他 repository（GIF、MP4 連結、截圖表格、模擬示範說明）。
+  4. `python3 scripts/update_checksums.py` 更新 `SHA256SUMS.txt`。
+  5. commit 後 `git push origin main`。
+  6. 等 GitHub Actions 的 Security Scan and Tests、Deploy to GitHub Pages、Android App 都完成，確認成功再回報；失敗就修好再推。
 - 網頁在 repository 根目錄；Android App（`android/`）建置時會把網頁打包進 APK，所以網頁修正會自動進到下一版 APK。推到 `main` 會自動部署網站並發佈新的 APK Release。
 - 不要把任何 API 金鑰、簽章金鑰（`.jks`）或 `keystore.properties` 放進 repository。
 - 使用者介面文字用繁體中文；README 有 12 種語言，英文與繁中版要保持一致。
+- GitHub 上的檔案規格參考使用者其他 repository（例如 tonykfr1234/superlive-ai-monitor、Android_wifi-spectrum）：12 種語言 README、CHANGELOG 中英對照、CONTRIBUTING、SECURITY、MIT LICENSE、SHA256SUMS.txt、docs/ 使用說明、docs/media 示範媒體、GitHub Actions 安全掃描與測試。

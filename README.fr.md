@@ -36,7 +36,9 @@ Les 12 langues du README traduisent la documentation. L'interface de l'applicati
 - Réunions : enregistrement, transcription, étiquettes d'intervenants (touches 1–9), traduction parallèle, compte rendu et actions par IA, export .txt/.md/.srt/.json/audio, partage LINE
 - Pratique : 8 scénarios × 6 phrases (anglais, vietnamien, thaï), notation de la prononciation, série quotidienne, jeu de rôle IA, guides
 
-<p align="center"><img src="docs/media/talk.png" alt="TalkBridge" width="640"></p>
+<p align="center"><img src="docs/media/talkbridge-demo.gif" alt="TalkBridge" width="720"></p>
+
+<p align="center"><a href="docs/media/talkbridge-demo.mp4">MP4</a></p>
 
 Documentation complète dans le <a href="README.md">README anglais</a>.
 

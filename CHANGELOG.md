@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-22 · 1.4.1
+
+- Documentation media: `npm run demo` drives the real app (scripted speech, sample translations, mocked AI, three synthetic voices for the meeting) and writes ten screenshots, a 90-second H.264 MP4 walkthrough and a GIF preview with bilingual captions. The README has a Demo section in the same format as the other repositories.
+- 示範媒體：`npm run demo` 自動操作真正的 App，產生 10 張截圖、約 90 秒的 MP4 影片與 GIF 動畫（中英字幕）；README 新增「示範」區塊。
+
+- Settings cards no longer stretch to equal height, which left large gaps between items; the Android update prompt lays out its button and note cleanly.
+- 修正設定頁卡片被拉高、項目之間出現大空白；Android 更新提示排版整齊。
+
 ## 2026-10-22 · 1.4.0
 
 - Android app (`android/`): the web app packaged in a native WebView shell with no third-party libraries. Android's speech recognizer and text-to-speech stand in for the browser's through web-standard shims (js/android.js); exports are saved to Downloads/TalkBridge; sharing opens the Android share sheet; the screen stays on while listening; external links (LINE, downloads) open in their apps; back returns to the interpreter. The web files are copied into the APK at build time.

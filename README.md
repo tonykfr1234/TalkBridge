@@ -13,7 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
 </p>
 <p align="center">
-  <a href="#quick-start">Quick start</a> · <a href="#android">Android</a> · <a href="#features">Features</a> · <a href="#screenshots">Screenshots</a> · <a href="#how-it-works">How it works</a> · <a href="#faq">FAQ</a> · <a href="#documentation">Documentation</a>
+  <a href="#quick-start">Quick start</a> · <a href="#android">Android</a> · <a href="#features">Features</a> · <a href="#demo">Demo</a> · <a href="#how-it-works">How it works</a> · <a href="#faq">FAQ</a> · <a href="#documentation">Documentation</a>
 </p>
 
 ```text
@@ -76,21 +76,24 @@ The app is the same web app packaged in a native shell: Android's speech recogni
 A single microphone cannot tell voices apart, so speaker labels come from you. The AI suggestion is based on what was said, not on voiceprints.
 
 <a id="screenshots"></a>
-## Screenshots
+<a id="demo"></a>
+## Demo
 
-| Interpreter | Subtitles |
-| --- | --- |
-| <img src="docs/media/talk.png" alt="Two-way interpreter" width="420"> | <img src="docs/media/subtitles.png" alt="Translated subtitles" width="420"> |
-| **Meeting minutes** | **Practice** |
-| <img src="docs/media/meeting.png" alt="Meeting minutes" width="420"> | <img src="docs/media/practice.png" alt="Phrase practice" width="420"> |
+This 90-second silent walkthrough runs **the real app in Chromium with scripted speech recognition, sample translations and a mocked AI provider**. In the meeting scene, three synthetic voices (two of them similar men) are played into the microphone, so speaker separation runs on real audio. Bilingual captions explain each step. It is not a recording of a real meeting or a benchmark of recognition accuracy.
 
-<p align="center"><img src="docs/media/speakers.png" alt="Speakers detected by voice, renamed with ✎" width="640"></p>
+![TalkBridge walkthrough](docs/media/talkbridge-demo.gif)
 
-<p align="center"><img src="docs/media/action-items.png" alt="Action items: owner, due date, priority, missing items flagged" width="640"></p>
+[Open or download the MP4 walkthrough](docs/media/talkbridge-demo.mp4)
 
-<p align="center"><img src="docs/media/phone-dark.png" alt="Phone, dark theme" width="220"></p>
+| Interpreter | Subtitles | Meeting transcript |
+| --- | --- | --- |
+| ![Two-way interpreter](docs/media/talk.png) | ![Translated subtitles](docs/media/subtitles.png) | ![Transcript with speakers found by voice](docs/media/meeting.png) |
+| **Action items** | **Practice** | **Settings** |
+| ![Owners, due dates and priorities](docs/media/action-items.png) | ![Pronunciation scoring](docs/media/practice.png) | ![AI providers and my voice](docs/media/settings.png) |
+| **Speakers by voice** | **Android app** | **Phone, dark theme** |
+| ![Speakers labelled by voice, with rename](docs/media/speakers.png) | ![Android app with the update prompt](docs/media/android.png) | ![Phone layout in dark theme](docs/media/phone-dark.png) |
 
-Screenshots come from the automated browser test with simulated speech and sample translations (`npm run shots`).
+Regenerate all media with `npm run demo` (see [CONTRIBUTING.md](CONTRIBUTING.md#generated-demo-media)).
 
 <a id="how-it-works"></a>
 ## How it works
