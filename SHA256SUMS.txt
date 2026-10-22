@@ -1,5 +1,5 @@
 d7172d89e842aa804f3c2b1077c4f618714b47b3dd8c071aaa77cb85a8722c2f  ./.gitattributes
-a1c287c5af6e7e21a9b2591f10b44bcc373b75498bc4b87050df2e61f446be48  ./.github/workflows/android.yml
+37375f92749b95440d12d91c967e67c09059f2f4e8ec3e6b254045a3c7640b8f  ./.github/workflows/android.yml
 35467adfc3787372b0ba8b028c8a9041f08009f84833273b74cfbcd8d230e7e1  ./.github/workflows/ci.yml
 e4db20c74d322e6c1f934fa42ee6a8ea01b88873f28f4c3b33a5ce6af0584964  ./.github/workflows/pages.yml
 e96ccd0ca653bbbc85e6366a467481080d6544d982be8c8316b1208278740f34  ./.gitignore
@@ -24,7 +24,7 @@ bb55a947a7c4a340062a016fe1d2f5c7620f9db5d3c01fca678bf8f89cb0fa25  ./SECURITY.md
 944531e0b618478e8ba5f3bdb2a0cacf8bb2c029a7dbf00ce2f0365c8be3ca25  ./android/app/proguard-rules.pro
 6cd6c415e2a689a5bd56d1ad4f11662dbaaf79f20245798056c14b139f195ca3  ./android/app/src/main/AndroidManifest.xml
 8986b6aa43cd70a1971f537c4eed7ac5467d351f0549c8b2f5a0ca8b5118ab5a  ./android/app/src/main/java/com/tonykfr/talkbridge/FileBridge.kt
-438064d7b05a7a362a9ca71da49bf84325bce6a2458764ac7da7e38990d6b5aa  ./android/app/src/main/java/com/tonykfr/talkbridge/MainActivity.kt
+96a1255ca3121cc0257b9d2bd4c5fce3c134708de8a7c46492cf867e3da6e42f  ./android/app/src/main/java/com/tonykfr/talkbridge/MainActivity.kt
 f203a9bdd88d5f266ea62d51cc4a8da005064812609f17ce3c58a09e13067d5e  ./android/app/src/main/java/com/tonykfr/talkbridge/NativeBridge.kt
 bc3df0c96ef0f25a9855429013504364db7447c59e83b509edc1b7776fb5817f  ./android/app/src/main/java/com/tonykfr/talkbridge/ShareProvider.kt
 c11e4648b35c07a5c964d3968c5fbdf288bbc9d795dfedf9b6c759ecae576909  ./android/app/src/main/java/com/tonykfr/talkbridge/SpeechBridge.kt

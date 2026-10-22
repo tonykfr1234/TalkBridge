@@ -94,6 +94,9 @@ class MainActivity : Activity() {
         }
     }
 
+    // Android 13+ uses the OnBackInvokedCallback registered in onCreate
+    // (enableOnBackInvokedCallback in the manifest); this covers older versions.
+    @SuppressLint("GestureBackNavigation")
     @Deprecated("Back on Android 12 and below")
     override fun onBackPressed() {
         goBack()
