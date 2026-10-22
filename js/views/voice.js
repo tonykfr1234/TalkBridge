@@ -12,6 +12,8 @@ let recStart = 0;
 let recTick = 0;
 let sample = null;     // WAV Blob of the recording
 let previewUrl = '';
+let creating = false;
+const SAMPLE_LINE = 'Hello, this is my own voice. TalkBridge will use it to read my translations.';
 
 export function initVoice() {
   $$('[data-voice-me]').forEach((b) => b.addEventListener('click', () => chooseMine(b.dataset.voiceMe)));
@@ -26,7 +28,8 @@ export function initVoice() {
   $('#clone-rec').addEventListener('click', () => (recorder ? stopRecording() : startRecording()));
   $('#clone-consent').addEventListener('change', updateCreate);
   $('#clone-create').addEventListener('click', create);
-  $('#clone-test').addEventListener('click', () => speak('Hello, this is my own voice, translated by TalkBridge.', 'en-US', { who: 'me', onError: (e) => toast(friendlyError(e), 6000) }));
+  $('#clone-test').addEventListener('click', () => speak(SAMPLE_LINE, 'en-US', { who: 'me', onError: (e) => toast(friendlyError(e), 6000) }));
+  $('#clone-retry').addEventListener('click', create);
   $('#clone-delete').addEventListener('click', remove);
   settings.onChange((k) => { if (k === 'openaiKey' || k === 'provider') paint(); });
   paint();
@@ -49,6 +52,13 @@ function paint() {
   $$('[data-voice-them]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.voiceThem === settings.get('voiceThem'))));
   $('#clone-ready').hidden = !hasClone();
   $('#clone-setup').hidden = hasClone();
+  const badge = $('#clone-badge');
+  badge.className = `badge ${creating ? 'busy' : hasClone() ? 'ready' : ''}`;
+  badge.textContent = creating ? '建立中…' : hasClone() ? '✓ 已建立' : '尚未建立';
+  const at = settings.get('cloneCreatedAt');
+  $('#clone-when').textContent = at ? `建立時間：${new Date(at).toLocaleString('zh-TW')}` : '';
+  const mine = $('[data-voice-me=clone]');
+  if (mine) mine.textContent = hasClone() ? '我的聲音 ✓' : '我的聲音';
   const engine = engineFor('female');
   $('#voice-engine-note').textContent = engine === 'openai'
     ? '女聲、男聲使用 OpenAI 線上語音（較自然，依字數計費）。'
@@ -58,7 +68,7 @@ function paint() {
 
 function updateCreate() {
   const ok = !!sample && $('#clone-consent').checked && !!(settings.get('elevenKey') || '').trim();
-  $('#clone-create').disabled = !ok;
+  $('#clone-create').disabled = !ok || creating;
   if (!sample) $('#clone-status').textContent = '';
   else if (!(settings.get('elevenKey') || '').trim()) $('#clone-status').textContent = '請先填入 ElevenLabs API 金鑰。';
   else if (!$('#clone-consent').checked) $('#clone-status').textContent = '請勾選同意。';
@@ -119,21 +129,50 @@ async function toWav(blob) {
   }
 }
 
+function step(n, state) {
+  const li = $(`#clone-step-${n}`);
+  li.className = state;
+}
+
 async function create() {
+  if (creating || !sample) return;
+  creating = true;
+  const started = Date.now();
   $('#clone-create').disabled = true;
-  $('#clone-status').textContent = '正在建立你的聲音（約 10–30 秒）…';
+  $('#clone-status').textContent = '';
+  $('#clone-error').hidden = true;
+  $('#clone-progress').hidden = false;
+  [1, 2, 3].forEach((n) => step(n, ''));
+  step(1, 'done');
+  step(2, 'doing');
+  const tick = setInterval(() => { $('#clone-elapsed').textContent = `${Math.round((Date.now() - started) / 1000)} 秒`; }, 500);
+  paint();
   try {
     const id = await createClone([sample], 'TalkBridge 我的聲音');
+    step(2, 'done');
     settings.set('cloneVoiceId', id);
+    settings.set('cloneCreatedAt', Date.now());
     settings.set('voiceMe', 'clone');
+    step(3, 'doing');
+    creating = false;
     sample = null;
     $('#clone-consent').checked = false;
     $('#clone-preview').hidden = true;
+    $('#clone-progress').hidden = true;
     paint();
-    toast(`已建立你的聲音，口譯時「我的話」會用${VOICE_LABEL.clone}唸。`, 5000);
+    $('#clone-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toast('✓ 你的聲音已建立好，正在用你的聲音試唸一句。', 6000);
+    speak(SAMPLE_LINE, 'en-US', { who: 'me', onError: (e) => toast(`聲音已建立，但試唸失敗：${friendlyError(e)}`, 6000) });
   } catch (e) {
-    $('#clone-status').textContent = friendlyError(e);
-    updateCreate();
+    creating = false;
+    $('#clone-progress').hidden = true;
+    $('#clone-error').hidden = false;
+    const why = friendlyError(e);
+    const raw = e && e.message && !why.includes(e.message) && !/^HTTP \d+$/.test(e.message) ? `\nElevenLabs 回覆：${e.message}` : '';
+    $('#clone-error-text').textContent = why + raw;
+    paint();
+  } finally {
+    clearInterval(tick);
   }
 }
 
@@ -143,6 +182,7 @@ async function remove() {
   try {
     if (id) await deleteClone(id);
     settings.set('cloneVoiceId', '');
+    settings.set('cloneCreatedAt', 0);
     paint();
     toast('已從 ElevenLabs 刪除你的聲音。');
   } catch (e) {

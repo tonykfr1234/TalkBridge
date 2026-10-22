@@ -330,11 +330,16 @@
           <p class="keynote" id="key-note"></p>
         </div>
         <div class="card stack" id="clone-card">
-          <h2>我的聲音（聲音克隆）</h2>
+          <h2 class="row" style="justify-content:space-between">我的聲音（聲音克隆）<span class="badge" id="clone-badge">尚未建立</span></h2>
           <p class="small muted">錄一段你自己的聲音，之後口譯時「我的話」翻譯完會用你的聲音唸出來，例如你說中文，對方聽到「你的聲音」說英文。使用 ElevenLabs 的即時聲音克隆，需要你自己的 ElevenLabs API 金鑰（聲音克隆需付費方案）。錄音只會傳給 ElevenLabs。</p>
           <label class="field">ElevenLabs API 金鑰<input type="password" id="eleven-key" placeholder="sk_…" autocomplete="off"></label>
           <div id="clone-ready" hidden class="stack">
-            <p class="ok-note">✓ 已建立你的聲音。口譯頁「我的話用」選「我的聲音」即可使用。</p>
+            <div class="done-box">
+              <p class="done-title">✓ 你的聲音已建立好</p>
+              <p class="small" id="clone-when"></p>
+              <p class="small">口譯頁「我的話用」已切到「我的聲音」：你說中文，翻成英文後會用你的聲音唸出來。</p>
+            </div>
+            <a class="btn primary" href="#talk">到口譯頁使用</a>
             <div class="row"><button class="btn" id="clone-test"><svg><use href="#i-play"/></svg>試聽我的聲音</button><button class="btn ghost" id="clone-delete"><svg><use href="#i-trash"/></svg>刪除我的聲音</button></div>
           </div>
           <div id="clone-setup" class="stack">
@@ -348,6 +353,20 @@
             <audio id="clone-preview" controls hidden></audio>
             <label class="check small"><input type="checkbox" id="clone-consent"> 這是我本人的聲音，我同意用它建立聲音克隆。</label>
             <div class="row"><button class="btn primary" id="clone-create" disabled><svg><use href="#i-spark"/></svg>建立我的聲音</button><span class="small" id="clone-status"></span></div>
+            <div class="progress-box" id="clone-progress" hidden>
+              <p class="row"><span class="spinner" aria-hidden="true"></span><b>正在建立你的聲音…</b><span class="muted small" id="clone-elapsed">0 秒</span></p>
+              <ol class="steps small">
+                <li id="clone-step-1">準備錄音檔</li>
+                <li id="clone-step-2">上傳並由 ElevenLabs 建立聲音（通常 10–30 秒）</li>
+                <li id="clone-step-3">用你的聲音試唸一句</li>
+              </ol>
+              <p class="small muted">請不要關閉這個頁面。完成時這裡會變成綠色，並用你的聲音唸一句話。</p>
+            </div>
+            <div class="error-box" id="clone-error" hidden>
+              <p><b>建立失敗</b></p>
+              <p class="small" id="clone-error-text"></p>
+              <button class="btn small" id="clone-retry">再試一次</button>
+            </div>
           </div>
         </div>
         <div class="card stack">

@@ -50,7 +50,14 @@ await context.route('https://api.elevenlabs.io/**', async (route) => {
   const url = new URL(req.url());
   const body = req.postDataBuffer() || Buffer.alloc(0);
   calls.push({ api: 'eleven', method: req.method(), path: url.pathname, key: req.headers()['xi-api-key'], body });
-  if (url.pathname === '/v1/voices/add') return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ voice_id: 'voice123' }) });
+  if (url.pathname === '/v1/voices/add') {
+    await new Promise((r) => setTimeout(r, 1500));
+    // The first attempt fails as if the plan had no voice cloning.
+    if (calls.filter((x) => x.path === '/v1/voices/add').length === 1) {
+      return route.fulfill({ status: 402, contentType: 'application/json', body: '{"detail":{"message":"Your plan does not include instant voice cloning."}}' });
+    }
+    return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ voice_id: 'voice123' }) });
+  }
   if (url.pathname.startsWith('/v1/text-to-speech/')) return route.fulfill({ contentType: 'audio/mpeg', body: wav() });
   if (req.method() === 'DELETE') return route.fulfill({ contentType: 'application/json', body: '{"status":"ok"}' });
   route.fulfill({ status: 404, body: '{}' });
@@ -60,6 +67,8 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 const step = async (name, fn) => { try { await fn(); console.log('ok   ', name); } catch (e) { console.log('FAIL ', name); throw e; } };
+const SHOTS = process.env.SHOT_DIR;
+const snap = async (name) => { if (SHOTS) await (await page.$('#clone-card')).screenshot({ path: `${SHOTS}/${name}.png` }); };
 const spoken = () => page.evaluate(() => window.__spoken.slice(-1)[0]);
 
 await page.goto(base + '#talk');
@@ -114,9 +123,28 @@ await step('clone: record, consent, create, speak, delete', async () => {
   await page.waitForSelector('#clone-preview:not([hidden])');
   assert.equal(await page.isDisabled('#clone-create'), true, 'needs consent');
   await page.check('#clone-consent');
+  assert.equal(await page.textContent('#clone-badge'), '尚未建立');
   await page.click('#clone-create');
+  await page.waitForSelector('#clone-progress:not([hidden])');
+  assert.equal(await page.textContent('#clone-badge'), '建立中…');
+  await snap('clone-progress');
+  assert.equal(await page.isDisabled('#clone-create'), true, 'no double submit while creating');
+  await page.waitForSelector('#clone-error:not([hidden])');
+  await snap('clone-error');
+  assert.match(await page.textContent('#clone-error-text'), /ElevenLabs 回覆：Your plan does not include instant voice cloning\./);
+  assert.equal(await page.textContent('#clone-badge'), '尚未建立');
+  await page.click('#clone-retry');
+  await page.waitForSelector('#clone-progress:not([hidden])');
   await page.waitForSelector('#clone-ready:not([hidden])');
-  const add = calls.find((x) => x.path === '/v1/voices/add');
+  assert.equal(await page.textContent('#clone-badge'), '✓ 已建立');
+  await snap('clone-done');
+  assert.match(await page.textContent('#clone-ready'), /你的聲音已建立好[\s\S]*建立時間/);
+  assert.equal(await page.isHidden('#clone-progress'), true);
+  await page.waitForFunction(() => true);
+  await page.waitForTimeout(600);
+  assert.ok(calls.some((x) => x.path === '/v1/text-to-speech/voice123' && JSON.parse(x.body.toString()).text.startsWith('Hello, this is my own voice')), 'plays a sample in the new voice');
+  assert.equal(await page.textContent('[data-voice-me=clone]'), '我的聲音 ✓');
+  const add = calls.filter((x) => x.path === '/v1/voices/add').pop();
   assert.equal(add.key, 'sk_eleven_test');
   assert.ok(add.body.includes(Buffer.from('name="files"')), 'sample uploaded');
   assert.ok(add.body.includes(Buffer.from('RIFF')), 'as WAV');

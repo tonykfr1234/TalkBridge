@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-22 · 1.3.1
+
+- Creating "my voice" shows its progress: a status badge (not created / creating / created), a progress box with steps and elapsed seconds, a green confirmation with the creation time that plays a sample in the new voice, and a red error box with ElevenLabs' own reason and a retry button. The create button stays disabled while creating, and the interpreter's button reads 「我的聲音 ✓」 once ready.
+- 建立「我的聲音」時會顯示狀態、進度與秒數；完成時綠色提示並用新聲音試唸，失敗時紅色框寫出原因並可再試一次。
+
 ## 2026-10-22 · 1.3.0
 
 - Voice choice for read-aloud translations: female, male or my own voice for my words, female or male for the other person's. OpenAI text-to-speech when an OpenAI key is saved, otherwise device voices picked by gender (from voice names). Online voices fall back to device voices on failure, and repeated lines are replayed from a cache.
