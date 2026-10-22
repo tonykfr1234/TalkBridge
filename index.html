@@ -132,7 +132,23 @@
           <span class="muted small" id="sub-count"></span>
         </div>
         <div class="tipbox small">
-          <b>讓電腦直接「聽」系統聲音（Windows）：</b>控制台 → 聲音 → 錄製 → 在「立體聲混音（Stereo Mix）」按右鍵啟用並設為預設裝置；沒有這個項目可以安裝免費的 VB-Audio Virtual Cable。之後 Chrome 收到的麥克風聲音就是電腦播放的聲音，不受環境噪音影響。Mac 可用 BlackHole。
+          <b>讓電腦直接「聽」系統聲音（Windows 11／10）</b>，字幕不受環境噪音影響：
+          <ol style="margin:6px 0;padding-left:20px">
+            <li>按 <kbd>Win</kbd>＋<kbd>R</kbd>，輸入 <code>mmsys.cpl</code> 按 Enter，打開「聲音」視窗。（也可以：設定 → 系統 → 音效 → 往下到「進階」→「更多音效設定」）</li>
+            <li>切到「錄製」分頁，在清單空白處按右鍵，勾選「顯示已停用的裝置」。</li>
+            <li>出現「立體聲混音」（Stereo Mix）時，按右鍵 →「啟用」。</li>
+            <li>在 Chrome 網址列輸入 <code>chrome://settings/content/microphone</code>，上方的麥克風下拉選單改成「立體聲混音」，再回來按「開始字幕」。用完記得改回原本的麥克風，否則口譯會聽不到你說話。</li>
+          </ol>
+          <details>
+            <summary>找不到「立體聲混音」？（很多筆電的音效驅動沒有這個項目）</summary>
+            <ol style="margin:6px 0;padding-left:20px">
+              <li>安裝免費的 VB-Audio Virtual Cable（vb-audio.com/Cable），裝完重新開機。</li>
+              <li>按工作列右下角的喇叭圖示，把輸出裝置選成「CABLE Input」。</li>
+              <li>為了自己也聽得到聲音：在 <code>mmsys.cpl</code> 的「錄製」分頁，對「CABLE Output」按右鍵 →「內容」→「接聽」分頁 → 勾選「接聽此裝置」，下方選你的喇叭或耳機 → 確定。</li>
+              <li>Chrome 麥克風（同上第 4 步）選「CABLE Output」。</li>
+            </ol>
+          </details>
+          Mac：安裝 BlackHole，在「音訊 MIDI 設定」建立包含喇叭和 BlackHole 的多重輸出裝置，Chrome 麥克風選 BlackHole。
         </div>
       </div>
     </section>

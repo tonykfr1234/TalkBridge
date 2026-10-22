@@ -2,6 +2,9 @@
 
 ## 2026-10-22 · 1.0.1
 
+- Rewrite the system-audio instructions for Windows 11: open the Sound dialog with `mmsys.cpl` (or Settings → System → Sound → More sound settings), show disabled devices, enable Stereo Mix and pick it in Chrome's microphone settings; step-by-step VB-Audio Virtual Cable setup, including "Listen to this device", for PCs without Stereo Mix.
+- 系統聲音說明改為 Windows 11 找得到的路徑：`mmsys.cpl`（或 設定 → 系統 → 音效 → 更多音效設定）、顯示已停用的裝置、啟用立體聲混音，並在 Chrome 麥克風設定中選取；沒有立體聲混音時的 VB-Cable 完整步驟（含「接聽此裝置」）。
+
 - Interpreter: when the script decides the language (Chinese characters vs. Latin letters, Thai…), trust it and translate from that language. A short Chinese phrase misdetected by the translation service was treated as the other person's speech and "translated" into Chinese, so no English was produced or read aloud.
 - 口譯修正：能從文字判斷語言時（中文字、拉丁字母、泰文…）以文字為準，並明確指定來源語言翻譯。之前短句中文若被翻譯服務誤判，會被當成對方說的話、翻回中文，導致沒有英文、也沒有唸出來。
 

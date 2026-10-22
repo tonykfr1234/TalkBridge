@@ -99,7 +99,7 @@ python3 -m http.server 8080      # 開啟 http://localhost:8080
 
 **哪些瀏覽器可以用？** Windows、macOS、Android 上的 Chrome 和 Edge 辨識效果最好；iPhone／iPad 請用 Safari 並開啟「聽寫」。Firefox 沒有語音辨識，但可打字翻譯和播放練習句。
 
-**不用第二台裝置，怎麼替電腦聲音上字幕？** Windows：控制台 → 聲音 → 錄製，啟用「立體聲混音」並設為預設；沒有的話安裝 VB-Audio Virtual Cable。macOS 可用 BlackHole。這樣 Chrome 就直接聽到電腦播放的聲音。
+**不用第二台裝置，怎麼替電腦聲音上字幕？** Windows 11／10：按 Win＋R 輸入 `mmsys.cpl` →「錄製」分頁 → 空白處按右鍵「顯示已停用的裝置」→ 啟用「立體聲混音」，再到 `chrome://settings/content/microphone` 把麥克風選成它。沒有「立體聲混音」的電腦改用免費的 VB-Audio Virtual Cable；macOS 用 BlackHole。詳細步驟見[使用說明](docs/USER_GUIDE.zh-TW.md)。
 
 **為什麼某些語言唸不出來？** 裝置沒有安裝該語言的語音。Windows：設定 → 時間與語言 → 語音；Android：設定 → 文字轉語音。
 

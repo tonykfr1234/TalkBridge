@@ -28,9 +28,23 @@
 
 **讓電腦直接聽系統聲音（效果最好）**
 
-- Windows：控制台 → 聲音 → 錄製 → 在空白處按右鍵「顯示已停用的裝置」→ 啟用「立體聲混音」並設為預設裝置。沒有這個項目時，安裝免費的 VB-Audio Virtual Cable，把播放裝置設為 CABLE Input、錄音裝置設為 CABLE Output。
-- macOS：安裝 BlackHole，在「音訊 MIDI 設定」建立多重輸出裝置。
-- 設定完成後，Chrome 收到的「麥克風」就是電腦播放的聲音，不會受到周圍噪音影響。
+Windows 11／10 有「立體聲混音」時：
+
+1. 按 Win＋R，輸入 `mmsys.cpl` 按 Enter，會打開傳統的「聲音」視窗。也可以從「設定 → 系統 → 音效」往下捲到「進階」，點「更多音效設定」。
+2. 切到「錄製」分頁，在裝置清單的空白處按右鍵，勾選「顯示已停用的裝置」。
+3. 對「立體聲混音」（Stereo Mix）按右鍵 →「啟用」。
+4. 在 Chrome 網址列輸入 `chrome://settings/content/microphone`，把上方的麥克風下拉選單改成「立體聲混音」。這樣比改 Windows 預設裝置更可靠，因為 Chrome 不一定使用 Windows 的預設麥克風。
+5. 回到 App 按「開始字幕」。用完記得把 Chrome 麥克風改回原本的，否則口譯和會議會聽不到你說話。
+
+找不到「立體聲混音」（很多筆電的音效驅動不提供）時，用免費的 VB-Audio Virtual Cable：
+
+1. 到 vb-audio.com/Cable 下載安裝，裝完重新開機。
+2. 按工作列右下角的喇叭圖示，把輸出裝置選成「CABLE Input」。這時喇叭會暫時沒聲音。
+3. 讓自己也聽得到：在 `mmsys.cpl` 的「錄製」分頁，對「CABLE Output」按右鍵 →「內容」→「接聽」分頁 → 勾選「接聽此裝置」，「透過此裝置播放」選你的喇叭或耳機 → 確定。
+4. Chrome 麥克風（同上第 4 步）選「CABLE Output」。
+5. 不用時把輸出裝置改回喇叭，Chrome 麥克風改回原本的。
+
+macOS：安裝 BlackHole，在「音訊 MIDI 設定」建立包含喇叭和 BlackHole 的「多重輸出裝置」並設為輸出，Chrome 麥克風選 BlackHole。
 
 ## 4. 會議記錄
 

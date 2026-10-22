@@ -99,7 +99,7 @@ transcript ─► Claude (your key, structured JSON) ─► minutes, action item
 
 **Which browsers work?** Chrome and Edge on Windows, macOS and Android have the best recognition. iPhone and iPad need Safari with Dictation enabled. Firefox has no speech recognition; typing and practice playback still work.
 
-**How do I caption computer audio without a second device?** On Windows enable *Stereo Mix* (Sound → Recording) and set it as the default input, or install VB-Audio Virtual Cable. On macOS use BlackHole. Chrome then hears the computer's sound directly.
+**How do I caption computer audio without a second device?** On Windows 11/10 press Win+R, run `mmsys.cpl`, open the Recording tab, right-click the list, choose *Show Disabled Devices* and enable *Stereo Mix*; then pick it as the microphone at `chrome://settings/content/microphone`. Many laptops have no Stereo Mix: install VB-Audio Virtual Cable instead. On macOS use BlackHole. Step-by-step instructions are in the [user guide](docs/USER_GUIDE.zh-TW.md).
 
 **Why does a voice not play?** The device lacks a voice for that language. Add one in Windows Settings → Time & language → Speech, or Android Settings → Text-to-speech.
 
