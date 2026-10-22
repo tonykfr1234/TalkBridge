@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-22 · 1.0.1
+
+- Interpreter: when the script decides the language (Chinese characters vs. Latin letters, Thai…), trust it and translate from that language. A short Chinese phrase misdetected by the translation service was treated as the other person's speech and "translated" into Chinese, so no English was produced or read aloud.
+- 口譯修正：能從文字判斷語言時（中文字、拉丁字母、泰文…）以文字為準，並明確指定來源語言翻譯。之前短句中文若被翻譯服務誤判，會被當成對方說的話、翻回中文，導致沒有英文、也沒有唸出來。
+
 ## 2026-10-21 · 1.0.0
 
 - First release of TalkBridge 語橋 as an installable web app (PWA).

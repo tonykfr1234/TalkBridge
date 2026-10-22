@@ -116,14 +116,19 @@ function paintButtons() {
 }
 
 async function handlePhrase(text, heardSide, { typed = false } = {}) {
-  // Decide which side spoke: script first, then the translator's detection.
+  // Decide which side spoke. When the script settles it (Chinese characters
+  // vs. Latin letters, Thai…), trust it and translate from that language;
+  // only same-script pairs fall back to the translator's detection.
   const guessed = guessPairSide(text, my(), their());
   let side = guessed ? (guessed === my() ? 'me' : 'them') : (typed ? 'me' : heardSide);
   const bubble = addBubble(side, text);
   try {
-    let res = await translate(text, 'auto', langOf(other(side)));
-    if (res.detected) {
-      if (sameLang(res.detected, langOf(other(side))) && !sameLang(res.detected, langOf(side))) {
+    let res;
+    if (guessed) {
+      res = await translate(text, langOf(side), langOf(other(side)));
+    } else {
+      res = await translate(text, 'auto', langOf(other(side)));
+      if (res.detected && sameLang(res.detected, langOf(other(side))) && !sameLang(res.detected, langOf(side))) {
         side = other(side);
         res = await translate(text, 'auto', langOf(other(side)));
       }

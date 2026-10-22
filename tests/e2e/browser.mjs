@@ -29,6 +29,7 @@ const BASE = `http://127.0.0.1:${server.address().port}/`;
 // back tagged with the target language.
 const DICT = {
   '你好，很高興認識你': { en: 'Hello, nice to meet you.' },
+  '聽中文': { en: 'Listen to Chinese', 'zh-TW': '聽中文' },
   'Nice to meet you too': { 'zh-TW': '我也很高興認識你。' },
   '請問洗手間在哪裡': { en: 'Excuse me, where is the restroom?' },
   'Welcome everyone to the quarterly review': { 'zh-TW': '歡迎大家參加本季業績檢討會' },
@@ -82,7 +83,8 @@ await context.route('https://translate.googleapis.com/**', (route) => {
   const u = new URL(route.request().url());
   const q = u.searchParams.get('q');
   const tl = u.searchParams.get('tl');
-  const detected = /[\u4e00-\u9fff]/.test(q) ? 'zh-TW' : 'en';
+  // '聽中文' simulates the translator misdetecting a short Chinese phrase.
+  const detected = q === '聽中文' ? 'en' : (/[\u4e00-\u9fff]/.test(q) ? 'zh-TW' : 'en');
   route.fulfill({ contentType: 'application/json', body: JSON.stringify([[[tr(q, tl), q, null]], null, detected]) });
 });
 await context.route('https://api.anthropic.com/**', async (route) => {
@@ -141,6 +143,15 @@ await step('auto interpreter translates both directions and alternates', async (
   await page.waitForTimeout(300);
   assert.ok(await say('Nice to meet you too'));
   await page.waitForSelector(`.bubble.them .dst:text("${sel(tr('Nice to meet you too', 'zh-TW'))}")`);
+  await page.click('#talk-auto-btn');
+});
+
+await step('short Chinese phrase is translated to English even if detection is wrong', async () => {
+  await page.click('#talk-auto-btn');
+  await page.waitForFunction(() => window.__recLang === 'zh-TW');
+  assert.ok(await say('聽中文'));
+  await page.waitForSelector('.bubble:not(.them) .dst:text("Listen to Chinese")');
+  await page.waitForFunction(() => window.__spoken.includes('Listen to Chinese'));
   await page.click('#talk-auto-btn');
 });
 
