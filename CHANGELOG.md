@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-22 · 1.4.0
+
+- Android app (`android/`): the web app packaged in a native WebView shell with no third-party libraries. Android's speech recognizer and text-to-speech stand in for the browser's through web-standard shims (js/android.js); exports are saved to Downloads/TalkBridge; sharing opens the Android share sheet; the screen stays on while listening; external links (LINE, downloads) open in their apps; back returns to the interpreter. The web files are copied into the APK at build time.
+- Android App：把網頁包進原生外殼，改用 Android 系統的語音辨識與朗讀；匯出存到「下載／TalkBridge」，分享開啟 Android 分享選單（可選 LINE）。
+
+- Every push to `main` tests, builds and publishes a signed APK to GitHub Releases (`1.4.0.<build>`), and the app offers the update when it opens. Signing uses repository secrets; without them the APK is marked as temporarily signed.
+- 每次推送到 `main` 自動打包並發佈 APK，App 開啟時會提示更新。
+
+- CLAUDE.md records the working rule: after every change, test, commit and push to GitHub.
+- 新增 CLAUDE.md：每次修改後都要測試並自動上傳 GitHub。
+
 ## 2026-10-22 · 1.3.1
 
 - Creating "my voice" shows its progress: a status badge (not created / creating / created), a progress box with steps and elapsed seconds, a green confirmation with the creation time that plays a sample in the new voice, and a red error box with ElevenLabs' own reason and a retry button. The create button stays disabled while creating, and the interpreter's button reads 「我的聲音 ✓」 once ready.

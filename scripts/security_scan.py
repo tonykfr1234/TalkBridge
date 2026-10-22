@@ -11,10 +11,11 @@ import re
 import sys
 from pathlib import Path
 
-SKIP_DIRS = {'.git', 'node_modules', '__pycache__', '.venv', 'test-results', 'playwright-report'}
-ALLOWED_MEDIA = re.compile(r'^(assets/icon-[\w-]+\.png|docs/media/[\w-]+\.png)$')
+SKIP_DIRS = {'.git', 'node_modules', '__pycache__', '.venv', 'test-results', 'playwright-report', 'build', '.gradle', '.kotlin'}
+ALLOWED_MEDIA = re.compile(r'^(assets/icon-[\w-]+\.png|docs/media/[\w-]+\.png|android/app/src/main/res/[\w-]+/ic_launcher[\w-]*\.png)$')
+ALLOWED_BINARY = {'android/gradle/wrapper/gradle-wrapper.jar'}
 MEDIA_SUFFIXES = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.mp4', '.webm', '.m4a', '.ogg', '.wav', '.mp3', '.mov'}
-FORBIDDEN_SUFFIXES = {'.log', '.zip', '.7z', '.rar', '.tar', '.gz', '.key', '.pem', '.p12'}
+FORBIDDEN_SUFFIXES = {'.log', '.zip', '.7z', '.rar', '.tar', '.gz', '.key', '.pem', '.p12', '.jks', '.keystore', '.apk', '.aab'}
 EXPORT_NAME = re.compile(r'^TalkBridge_\d{8}-\d{4}_')
 PATTERNS = {
     'Anthropic API key': re.compile(r'\bsk-ant-[A-Za-z0-9_-]{20,}'),
@@ -35,6 +36,11 @@ def scan(root: Path) -> list[str]:
             continue
         name = path.name.lower()
         suffix = path.suffix.lower()
+        if rel in ALLOWED_BINARY:
+            continue
+        if name == 'keystore.properties':
+            problems.append(f'{rel}: signing passwords must not be committed')
+            continue
         if name == '.env' or (name.startswith('.env.') and name != '.env.example'):
             problems.append(f'{rel}: environment file must not be committed')
             continue

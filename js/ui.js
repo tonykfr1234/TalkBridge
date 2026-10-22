@@ -1,5 +1,6 @@
 // Small DOM helpers shared by the views.
 import { LANGS } from './langs.js';
+import { isAndroidApp, saveFile } from './android.js';
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -47,6 +48,10 @@ export function toast(msg, ms = 3200) {
 }
 
 export function download(blob, filename) {
+  if (isAndroidApp) {
+    saveFile(blob, filename).then((msg) => toast(msg || `已存到「下載」：${filename}`, 4000)).catch(() => toast('存檔失敗'));
+    return;
+  }
   const url = URL.createObjectURL(blob);
   const a = h('a', { href: url, download: filename });
   document.body.append(a);

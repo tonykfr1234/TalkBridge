@@ -1,9 +1,9 @@
 // Offline cache for the app shell. Translation and speech recognition still
 // need a network connection; the app opens and shows saved meetings offline.
-const VERSION = 'talkbridge-v1.3.1';
+const VERSION = 'talkbridge-v1.4.0';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
-  'js/app.js', 'js/ai.js', 'js/diarize.js', 'js/duedate.js', 'js/langs.js', 'js/whisper.js', 'js/tts.js', 'js/practice-data.js', 'js/speech.js', 'js/store.js',
+  'js/app.js', 'js/ai.js', 'js/android.js', 'js/diarize.js', 'js/duedate.js', 'js/langs.js', 'js/whisper.js', 'js/tts.js', 'js/practice-data.js', 'js/speech.js', 'js/store.js',
   'js/textkit.js', 'js/translate.js', 'js/ui.js',
   'js/views/learn.js', 'js/views/meet.js', 'js/views/settings.js', 'js/views/subs.js', 'js/views/talk.js', 'js/views/voice.js',
   'js/vendor/anthropic-sdk.js',

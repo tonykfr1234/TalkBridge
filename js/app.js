@@ -1,4 +1,5 @@
 // App entry: view switching, service worker, browser support banner.
+import { isAndroidApp, checkForUpdate, openExternal } from './android.js';
 import { initTalk, leaveTalk } from './views/talk.js';
 import { initSubs, leaveSubs } from './views/subs.js';
 import { initMeet, meetingBusy } from './views/meet.js';
@@ -44,7 +45,16 @@ function boot() {
     b.hidden = false;
     b.innerHTML = '<b>這個瀏覽器沒有語音辨識。</b> 打字翻譯和練習播放仍可使用；要用口譯、字幕和會議逐字稿，請改用 Chrome 或 Edge（電腦、Android），或 iPhone 的 Safari。';
   }
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  if (isAndroidApp) {
+    checkForUpdate().then((u) => {
+      if (!u) return;
+      const b = $('#support-banner');
+      b.hidden = false;
+      b.innerHTML = `<b>有新版本 ${u.version}</b>　<button class="btn small primary" id="update-btn">下載更新</button> <span class="small muted">下載後點開安裝即可，資料會保留。</span>`;
+      $('#update-btn').addEventListener('click', () => openExternal(u.url));
+    });
+  }
+  if (!isAndroidApp && 'serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   window.addEventListener('beforeunload', (e) => {

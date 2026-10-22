@@ -7,12 +7,13 @@
 <h1 align="center">Live Interpreter, Translated Subtitles, Meeting Minutes and Language Practice</h1>
 <p align="center">TalkBridge 語橋 · Installable web app (PWA) for Chrome, Edge, Android and iPhone</p>
 <p align="center">
+  <a href="https://github.com/tonykfr1234/TalkBridge/releases/latest"><img src="https://img.shields.io/github/v/release/tonykfr1234/TalkBridge?label=Android%20APK&color=0b7480" alt="Android APK"></a>
   <img src="https://img.shields.io/badge/platform-Web%20%7C%20Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS-0b7480" alt="Platforms">
   <img src="https://img.shields.io/badge/languages-22-7a4b9a" alt="22 languages">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
 </p>
 <p align="center">
-  <a href="#quick-start">Quick start</a> · <a href="#features">Features</a> · <a href="#screenshots">Screenshots</a> · <a href="#how-it-works">How it works</a> · <a href="#faq">FAQ</a> · <a href="#documentation">Documentation</a>
+  <a href="#quick-start">Quick start</a> · <a href="#android">Android</a> · <a href="#features">Features</a> · <a href="#screenshots">Screenshots</a> · <a href="#how-it-works">How it works</a> · <a href="#faq">FAQ</a> · <a href="#documentation">Documentation</a>
 </p>
 
 ```text
@@ -45,6 +46,13 @@ python3 -m http.server 8080      # then open http://localhost:8080
 ```
 
 The included GitHub Actions workflow publishes the app to GitHub Pages on every push to `main`.
+
+<a id="android"></a>
+## Android app
+
+Download **[TalkBridge.apk](https://github.com/tonykfr1234/TalkBridge/releases/latest/download/TalkBridge.apk)** from the [latest release](https://github.com/tonykfr1234/TalkBridge/releases/latest) and open it on the phone (allow installing from your browser when Android asks). Android 8.0 or newer.
+
+The app is the same web app packaged in a native shell: Android's speech recognizer and text-to-speech replace the browser's, exports go to Downloads/TalkBridge, and sharing opens the Android share sheet (LINE included). Every push to `main` builds, tests and publishes a new APK, and the app offers the update when it opens. Details and the one-time signing-key setup: [docs/ANDROID.zh-TW.md](docs/ANDROID.zh-TW.md).
 
 <a id="features"></a>
 ## Features
@@ -120,6 +128,7 @@ transcript ─► DeepSeek / OpenAI / Claude (your key, JSON) ─► minutes, ow
 ## Documentation
 
 - [User guide (Traditional Chinese)](docs/USER_GUIDE.zh-TW.md)
+- [Android app (Traditional Chinese)](docs/ANDROID.zh-TW.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 

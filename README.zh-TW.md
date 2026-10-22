@@ -7,12 +7,13 @@
 <h1 align="center">即時口譯、翻譯字幕、會議記錄與語言練習</h1>
 <p align="center">TalkBridge 語橋 · 可安裝的網頁 App（PWA），支援 Chrome、Edge、Android 與 iPhone</p>
 <p align="center">
+  <a href="https://github.com/tonykfr1234/TalkBridge/releases/latest"><img src="https://img.shields.io/github/v/release/tonykfr1234/TalkBridge?label=Android%20APK&color=0b7480" alt="Android APK"></a>
   <img src="https://img.shields.io/badge/platform-Web%20%7C%20Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS-0b7480" alt="平台">
   <img src="https://img.shields.io/badge/languages-22-7a4b9a" alt="22 種語言">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT 授權"></a>
 </p>
 <p align="center">
-  <a href="#quick-start">快速開始</a> · <a href="#features">功能</a> · <a href="#screenshots">畫面</a> · <a href="#how-it-works">運作原理</a> · <a href="#faq">常見問題</a> · <a href="#documentation">文件</a>
+  <a href="#quick-start">快速開始</a> · <a href="#android">Android</a> · <a href="#features">功能</a> · <a href="#screenshots">畫面</a> · <a href="#how-it-works">運作原理</a> · <a href="#faq">常見問題</a> · <a href="#documentation">文件</a>
 </p>
 
 ```text
@@ -45,6 +46,13 @@ python3 -m http.server 8080      # 開啟 http://localhost:8080
 ```
 
 專案內建 GitHub Actions，每次推送到 `main` 都會自動部署到 GitHub Pages。
+
+<a id="android"></a>
+## Android App
+
+到[最新版本](https://github.com/tonykfr1234/TalkBridge/releases/latest)下載 **[TalkBridge.apk](https://github.com/tonykfr1234/TalkBridge/releases/latest/download/TalkBridge.apk)**，在手機上點開安裝（Android 詢問時，允許從瀏覽器安裝）。需要 Android 8.0 以上。
+
+App 和網頁是同一套程式，包在原生外殼裡：改用 Android 系統的語音辨識與朗讀，匯出檔存到「下載／TalkBridge」，分享會開啟 Android 分享選單（可選 LINE）。每次推送到 `main` 都會自動測試、打包並發佈新的 APK，App 開啟時會提示更新。詳細說明與一次性的簽章金鑰設定：[docs/ANDROID.zh-TW.md](docs/ANDROID.zh-TW.md)。
 
 <a id="features"></a>
 ## 功能
@@ -120,6 +128,7 @@ python3 -m http.server 8080      # 開啟 http://localhost:8080
 ## 文件
 
 - [使用說明](docs/USER_GUIDE.zh-TW.md)
+- [Android App](docs/ANDROID.zh-TW.md)
 - [架構說明（英文）](docs/ARCHITECTURE.md)
 - [更新紀錄](CHANGELOG.md) · [參與貢獻](CONTRIBUTING.md) · [安全政策](SECURITY.md)
 
