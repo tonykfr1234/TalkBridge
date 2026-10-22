@@ -1,6 +1,6 @@
 {
   "name": "talkbridge",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "即時口譯、翻譯字幕、會議逐字稿（自動分辨發言人）與語言練習的瀏覽器 App (PWA)",
@@ -10,7 +10,7 @@
     "test:e2e": "node tests/e2e/browser.mjs",
     "shots": "node tests/e2e/browser.mjs --shots",
     "serve": "python3 -m http.server 8080",
-    "test:voices": "node tests/e2e/diarize-audio.mjs"
+    "test:voices": "node tests/e2e/diarize-audio.mjs && node tests/e2e/whisper-audio.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.1"

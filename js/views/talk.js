@@ -3,9 +3,12 @@ import { byCode, sameLang, guessPairSide } from '../langs.js';
 import { translate } from '../translate.js';
 import { Recognizer, recognizerErrorText, speak, stopSpeaking, canRecognize } from '../speech.js';
 import { settings } from '../store.js';
+import { WhisperListener, hasWhisper } from '../whisper.js';
+import { friendlyError } from '../ai.js';
 import { $, h, icon, fillLangSelect, toast, copyText, keepAwake } from '../ui.js';
 
 let rec = null;
+let whisper = null;            // WhisperListener in auto mode with an OpenAI key
 let mode = settings.get('convMode');
 let listeningSide = 'me';      // which language the recognizer is set to
 let active = null;             // 'auto' | 'me' | 'them' | null
@@ -55,6 +58,7 @@ export function initTalk() {
   });
   setMode(mode);
   refreshLabels();
+  settings.onChange((k) => { if (k === 'openaiKey' || k === 'myLang' || k === 'theirLang') refreshLabels(); });
 }
 
 function setMode(m) {
@@ -65,22 +69,42 @@ function setMode(m) {
   $('#mode-manual').setAttribute('aria-pressed', String(m === 'manual'));
   $('#talk-auto').hidden = m !== 'auto';
   $('#talk-manual').hidden = m !== 'manual';
+  $('#auto-engine').hidden = m !== 'auto';
 }
 
 function refreshLabels() {
   const a = byCode(my()), b = byCode(their());
   $('#talk-me-label').textContent = `我說 ${a.native}`;
   $('#talk-them-label').textContent = `對方說 ${b.native}`;
-  $('#auto-hint').textContent = `聽到${a.name}就翻${b.name}，聽到${b.name}就翻${a.name}`;
+  $('#auto-hint').textContent = hasWhisper()
+    ? `任何順序說${a.name}或${b.name}都可以，OpenAI Whisper 會自動判斷語言`
+    : `聽到${a.name}就翻${b.name}，聽到${b.name}就翻${a.name}`;
+  $('#auto-engine').textContent = hasWhisper()
+    ? '辨識：OpenAI Whisper（每句自動判斷語言）'
+    : `辨識：瀏覽器免費辨識，一直以${byCode(langOf(anchorSide())).name}收音，並依文字判斷語言。若常聽錯，到「設定」填入 OpenAI 金鑰改用 Whisper。`;
   if (rec) rec.setLang(byCode(langOf(listeningSide)).locale);
 }
 
+// The browser recognizer hears one language at a time. In free automatic
+// mode it stays on one language instead of guessing turns: Chinese when the
+// pair includes it, because the Chinese recognizer also writes out English
+// sentences, while the English one turns Chinese into English-sounding words.
+function anchorSide() {
+  const zh = (code) => /^(zh|yue)/.test(code);
+  if (zh(my())) return 'me';
+  if (zh(their())) return 'them';
+  return 'me';
+}
+
+export function refreshTalkEngine() { refreshLabels(); }
+
 function toggle(which) {
-  if (!canRecognize) { toast(recognizerErrorText('unsupported'), 5000); return; }
   if (active === which) { stop(); return; }
   if (active) stop();
+  if (which === 'auto' && hasWhisper()) { startWhisper(); return; }
+  if (!canRecognize) { toast(recognizerErrorText('unsupported'), 5000); return; }
   active = which;
-  listeningSide = which === 'them' ? 'them' : 'me';
+  listeningSide = which === 'auto' ? anchorSide() : which;
   rec = new Recognizer({
     lang: byCode(langOf(listeningSide)).locale,
     onInterim: (t) => { $('#talk-interim').textContent = t ? `「${t}」` : (active ? listeningText() : ''); },
@@ -94,13 +118,40 @@ function toggle(which) {
   paintButtons();
 }
 
+function startWhisper() {
+  active = 'auto';
+  const a = byCode(my()), b = byCode(their());
+  whisper = new WhisperListener({
+    hint: `以下是${a.name}和${b.name}的對話，中文請用繁體字。${a.native}. ${b.native}.`,
+    onResult: ({ text, language }) => handlePhrase(text, 'me', { language }),
+    onState: (st, detail) => {
+      if (st === 'error') {
+        if (detail === 'denied') { toast(recognizerErrorText('denied'), 6000); stop(); return; }
+        toast(friendlyError(detail), 6000);
+        if (detail && (detail.status === 401 || detail.status === 403)) stop();
+        return;
+      }
+      if (st === 'speech') $('#talk-interim').textContent = '● 聽到說話…';
+      if (st === 'busy') $('#talk-interim').textContent = '● 辨識中…';
+      if (st === 'listening' && active) $('#talk-interim').textContent = listeningText();
+    },
+  });
+  whisper.start();
+  keepAwake(true);
+  paintButtons();
+}
+
 function listeningText() {
-  return `● 正在聽 ${byCode(langOf(listeningSide)).name}…`;
+  if (whisper) return `● 聆聽中：${byCode(my()).name}或${byCode(their()).name}都可以…`;
+  return active === 'auto'
+    ? `● 聆聽中（以${byCode(langOf(listeningSide)).name}收音，中英文都會判斷）…`
+    : `● 正在聽 ${byCode(langOf(listeningSide)).name}…`;
 }
 
 function stop() {
   active = null;
   if (rec) { rec.stop(); rec = null; }
+  if (whisper) { whisper.stop(); whisper = null; }
   stopSpeaking();
   keepAwake(false);
   $('#talk-interim').textContent = '';
@@ -115,11 +166,14 @@ function paintButtons() {
   if (active) $('#talk-interim').textContent = listeningText();
 }
 
-async function handlePhrase(text, heardSide, { typed = false } = {}) {
-  // Decide which side spoke. When the script settles it (Chinese characters
-  // vs. Latin letters, Thai…), trust it and translate from that language;
-  // only same-script pairs fall back to the translator's detection.
-  const guessed = guessPairSide(text, my(), their());
+async function handlePhrase(text, heardSide, { typed = false, language = '' } = {}) {
+  // Decide which side spoke. Whisper reports the language; otherwise, when
+  // the script settles it (Chinese characters vs. Latin letters, Thai…),
+  // trust it and translate from that language; only same-script pairs fall
+  // back to the translator's detection.
+  let guessed = guessPairSide(text, my(), their());
+  if (language && sameLang(language, my()) && !sameLang(language, their())) guessed = my();
+  else if (language && sameLang(language, their()) && !sameLang(language, my())) guessed = their();
   let side = guessed ? (guessed === my() ? 'me' : 'them') : (typed ? 'me' : heardSide);
   const bubble = addBubble(side, text);
   try {
@@ -136,12 +190,7 @@ async function handlePhrase(text, heardSide, { typed = false } = {}) {
     const to = langOf(other(side));
     fillBubble(bubble, side, res.text, to);
     log.push({ side, src: text, dst: res.text });
-    if (active === 'auto') {
-      // Conversations alternate: expect the other person next.
-      listeningSide = other(side);
-      if (rec) rec.setLang(byCode(langOf(listeningSide)).locale);
-      $('#talk-interim').textContent = listeningText();
-    }
+    if (active) $('#talk-interim').textContent = listeningText();
     if (settings.get('speakOut') && !typed) await speakPaused(res.text, to);
   } catch (e) {
     bubble.querySelector('.dst').textContent = e.message || '翻譯失敗';
@@ -156,12 +205,14 @@ async function speakPaused(text, lang) {
   speaking = true;
   const wasActive = active;
   if (rec) rec.stop();
+  if (whisper) whisper.pause();
   await speak(text, byCode(lang).locale);
   speaking = false;
   if (wasActive && active === wasActive && rec) {
     rec.setLang(byCode(langOf(listeningSide)).locale);
     rec.start();
   }
+  if (wasActive && active === wasActive && whisper) whisper.resume();
 }
 
 function addBubble(side, src) {

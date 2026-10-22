@@ -55,7 +55,7 @@
         <div>
           <div class="eyebrow">即時口譯</div>
           <h1>說中文出英文，說英文出中文</h1>
-          <p class="lede">自動模式會偵測誰在說哪種語言，翻成另一種並唸出來。面對面時也可以按下自己那一邊的按鈕。</p>
+          <p class="lede">自動模式不限順序，說中文就翻英文、說英文就翻中文並唸出來。面對面時也可以按下自己那一邊的按鈕。</p>
         </div>
         <div class="mode-switch" role="group" aria-label="模式">
           <button id="mode-auto" aria-pressed="true">自動偵測</button>
@@ -79,6 +79,7 @@
             <p class="empty" id="thread-empty">按下方按鈕開始說話。翻譯會出現在這裡，點喇叭可以重聽。</p>
           </div>
           <p class="listening-line" id="talk-interim"></p>
+          <p class="small muted" id="auto-engine" style="margin:0 0 8px"></p>
           <div class="talk" id="talk-auto">
             <button class="talk-btn auto-btn" id="talk-auto-btn"><svg><use href="#i-mic"/></svg><span>開始自動口譯</span><small id="auto-hint">聽到中文就翻英文，聽到英文就翻中文</small></button>
           </div>

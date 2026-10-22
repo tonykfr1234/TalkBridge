@@ -157,16 +157,25 @@ await step('loads without errors', async () => {
   await page.waitForSelector('#view-talk:not([hidden])');
 });
 
-await step('auto interpreter translates both directions and alternates', async () => {
+await step('free auto interpreter: any order, recognizer stays on Chinese', async () => {
+  assert.match(await page.textContent('#auto-engine'), /瀏覽器免費辨識/);
   await page.click('#talk-auto-btn');
   await page.waitForFunction(() => window.__recLang === 'zh-TW');
   assert.ok(await say('你好，很高興認識你'));
   await page.waitForSelector(`.bubble:not(.them) .dst:text("${sel(tr('你好，很高興認識你', 'en'))}")`);
   await page.waitForFunction((t) => window.__spoken.includes(t), tr('你好，很高興認識你', 'en'));
-  await page.waitForFunction(() => window.__recLang === 'en-US');
   await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => window.__recLang), 'zh-TW', 'no switching between turns');
+  // Two English lines in a row, then Chinese again.
   assert.ok(await say('Nice to meet you too'));
   await page.waitForSelector(`.bubble.them .dst:text("${sel(tr('Nice to meet you too', 'zh-TW'))}")`);
+  await page.waitForTimeout(300);
+  assert.ok(await say('How was your trip'));
+  await page.waitForSelector('.bubble.them .dst:text("[zh-TW] How was your trip")');
+  await page.waitForTimeout(300);
+  assert.ok(await say('請問洗手間在哪裡'));
+  await page.waitForSelector(`.bubble:not(.them) .dst:text("${sel(tr('請問洗手間在哪裡', 'en'))}")`);
+  assert.equal(await page.evaluate(() => window.__recLang), 'zh-TW');
   await page.click('#talk-auto-btn');
 });
 

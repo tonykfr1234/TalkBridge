@@ -4,18 +4,12 @@
 // the meeting view records. Speech recognition is scripted; the voice
 // fingerprints come from the real audio.
 // Run: node tests/e2e/diarize-audio.mjs   (needs ffmpeg built with libflite)
-import { createServer } from 'node:http';
-import { readFile, writeFile, mkdtemp } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { extname, join, normalize } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
+import { join } from 'node:path';
 import { chromium } from 'playwright';
+import { ROOT, hasFlite, conversation, serve } from './voices.mjs';
 
-const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const RATE = 48000;
-const GAP = 1.6; // seconds of silence between turns
+if (!hasFlite()) { console.log('skip: ffmpeg with libflite is not available'); process.exit(0); }
 
 const TURNS = [
   ['kal', 'Good morning everyone, thanks for joining the weekly meeting'],
@@ -29,55 +23,8 @@ const TURNS = [
   ['rms', 'We should also update the safety training schedule'],
 ];
 
-const dir = await mkdtemp(join(tmpdir(), 'tb-voices-'));
-function synth(voice, text, file) {
-  execFileSync('ffmpeg', ['-nostdin', '-loglevel', 'error', '-y', '-f', 'lavfi', '-i',
-    `flite=text='${text.replace(/'/g, '')}':voice=${voice}`, '-ar', String(RATE), '-ac', '1', '-c:a', 'pcm_s16le', file]);
-}
-try {
-  execFileSync('ffmpeg', ['-hide_banner', '-filters'], { encoding: 'utf8' }).includes('flite') || (() => { throw new Error(); })();
-} catch {
-  console.log('skip: ffmpeg with libflite is not available');
-  process.exit(0);
-}
-
-// Build the conversation and remember when each turn ends.
-const pcm = [];
-const ends = [];
-let total = Math.round(RATE * 1.0);
-pcm.push(new Int16Array(total));
-for (const [i, [voice, text]] of TURNS.entries()) {
-  const f = join(dir, `${i}.wav`);
-  synth(voice, text, f);
-  const b = await readFile(f);
-  const s = new Int16Array(b.buffer.slice(b.byteOffset + 44, b.byteOffset + b.length));
-  pcm.push(s);
-  total += s.length;
-  ends.push(total / RATE);
-  const gap = new Int16Array(Math.round(RATE * GAP));
-  pcm.push(gap);
-  total += gap.length;
-}
-pcm.push(new Int16Array(RATE * 30)); // silence after the last turn (the fake device loops)
-total += RATE * 30;
-const header = Buffer.alloc(44);
-header.write('RIFF', 0); header.writeUInt32LE(36 + total * 2, 4); header.write('WAVE', 8);
-header.write('fmt ', 12); header.writeUInt32LE(16, 16); header.writeUInt16LE(1, 20); header.writeUInt16LE(1, 22);
-header.writeUInt32LE(RATE, 24); header.writeUInt32LE(RATE * 2, 28); header.writeUInt16LE(2, 32); header.writeUInt16LE(16, 34);
-header.write('data', 36); header.writeUInt32LE(total * 2, 40);
-const conv = join(dir, 'conversation.wav');
-await writeFile(conv, Buffer.concat([header, ...pcm.map((a) => Buffer.from(a.buffer, a.byteOffset, a.byteLength))]));
-
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
-const server = createServer(async (req, res) => {
-  const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^([/\\])+/, '') || 'index.html';
-  try {
-    const body = await readFile(join(ROOT, path));
-    res.writeHead(200, { 'content-type': TYPES[extname(path)] || 'application/octet-stream' });
-    res.end(body);
-  } catch { res.writeHead(404); res.end(); }
-});
-await new Promise((r) => server.listen(0, r));
+const { path: conv, ends } = await conversation(TURNS);
+const { server, base } = await serve();
 
 const browser = await chromium.launch({
   args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${conv}`],
@@ -104,7 +51,7 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 
-await page.goto(`http://127.0.0.1:${server.address().port}/#meet`);
+await page.goto(base + '#meet');
 await page.selectOption('#meet-lang', 'en');
 await page.selectOption('#meet-tr', '');
 assert.equal(await page.isChecked('#meet-auto-spk'), true, 'automatic speakers on by default');

@@ -51,7 +51,7 @@ The included GitHub Actions workflow publishes the app to GitHub Pages on every 
 
 | Feature | Behavior |
 | --- | --- |
-| Two-way interpreter | **Auto** mode detects which side is speaking (by script, then by the translator's language detection), translates to the other language, reads it aloud, then listens for the other person. **Push-to-talk** mode gives each person a button. Typing also works. |
+| Two-way interpreter | **Auto** mode takes either language in any order. With an OpenAI key, each utterance is cut from the microphone by voice activity and transcribed by Whisper, which reports its language; without one, the free browser recognizer listens in Chinese (which also writes out English sentences) and the script of the text decides the language. The translation is read aloud while listening pauses. **Push-to-talk** gives each person a button. Typing also works. |
 | 22 languages | Chinese (Taiwan / Simplified / Cantonese), English, Vietnamese, Thai, Japanese, Korean, Indonesian, Malay, Filipino, Khmer, Burmese, Hindi, Spanish, French, German, Italian, Portuguese, Russian, Arabic, Turkish |
 | Subtitle mode | Large broadcast-style captions with the original line above. Interim words are translated every 0.7 s so captions keep up with the speaker. Full-screen, font size, top/bottom position, `.srt` export |
 | Meeting minutes | Live transcript with timestamps, optional parallel translation (e.g. Chinese → English), audio recording with a level meter, pause/resume, autosave to the device |
@@ -109,7 +109,7 @@ transcript ─► DeepSeek / OpenAI / Claude (your key, JSON) ─► minutes, ow
 
 **Why does a voice not play?** The device lacks a voice for that language. Add one in Windows Settings → Time & language → Speech, or Android Settings → Text-to-speech.
 
-**Does auto mode always pick the right speaker?** It decides by script first (Chinese characters vs. Latin vs. Thai), then by the translator's detected language, and expects turns to alternate. Two languages in the same script (e.g. English and Spanish) rely on detection alone; use push-to-talk for those.
+**Can I switch languages in any order?** Yes. For the most reliable result add an OpenAI key in Settings: Whisper detects the language of every sentence (about US$0.006 per minute of speech). Without a key the free mode keeps the browser recognizer on Chinese and decides by the text; if English comes out as Chinese-sounding words on your device, use the key or push-to-talk.
 
 **Is my API key safe?** It stays in this browser's storage and is sent only to the provider you chose (`api.deepseek.com`, `api.openai.com` or `api.anthropic.com`). The app never ships with a key built in: anything in a public site's code can be copied by anyone. Use a key with a spending limit and clear it on shared computers.
 

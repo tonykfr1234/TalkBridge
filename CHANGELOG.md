@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-22 · 1.2.0
+
+- Interpreter auto mode no longer assumes people take turns. With an OpenAI key, utterances are cut from the microphone by voice activity and transcribed by Whisper, which detects the language of each one, so either language works in any order. Without a key, the free browser recognizer stays on Chinese (which also writes English sentences in English) and the text decides the language, instead of switching to English after every Chinese line and mishearing the next Chinese line.
+- 口譯自動模式不再假設輪流說話：有 OpenAI 金鑰時，每句交給 Whisper 自動判斷語言，中英文不限順序；沒有金鑰時一直以中文收音並依文字判斷，不會再說完中文就切成英文、把下一句中文聽錯。
+
 ## 2026-10-22 · 1.1.1
 
 - Automatic speakers are numbered 發言人 1, 2, 3…; each has a visible ✎ rename button, and the speaker tab lists every speaker with a sample line for renaming after the meeting. Before recording, the speaker area explains what will appear.
