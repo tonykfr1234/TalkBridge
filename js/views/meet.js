@@ -32,7 +32,8 @@ let fx = null;           // FeatureExtractor
 let frames = [];         // frames since the previous recognized phrase
 let diarizer = null;     // OnlineDiarizer
 const autoSpeakers = () => settings.get('meetAutoSpeaker') !== false;
-const letterName = (i) => `發言人 ${String.fromCharCode(65 + i)}`;
+const numberName = (i) => `發言人 ${i + 1}`;
+const AUTO_LABEL = /^發言人 ([A-Z]|\d+)$/;
 
 export const meetingBusy = () => running;
 
@@ -45,7 +46,7 @@ function blank() {
     durationMs: 0,
     lang: settings.get('meetLang'),
     trLang: settings.get('meetTranslate'),
-    speakers: autoSpeakers() ? [] : ['發言人 A', '發言人 B', '發言人 C'],
+    speakers: autoSpeakers() ? [] : ['發言人 1', '發言人 2', '發言人 3'],
     segments: [],
     notes: null,
     audio: null,
@@ -242,7 +243,7 @@ function stopVoiceTap() {
 const round = (v) => v.map((x) => Math.round(x * 1000) / 1000);
 
 function ensureSpeaker(i) {
-  while (cur.speakers.length <= i) cur.speakers.push(letterName(cur.speakers.length));
+  while (cur.speakers.length <= i) cur.speakers.push(numberName(cur.speakers.length));
   return cur.speakers[i];
 }
 
@@ -312,9 +313,9 @@ function recluster(report) {
   for (const cl of votes.keys()) {
     if (nameOf.has(cl)) continue;
     let k = 0;
-    while (used.has(letterName(k))) k++;
-    nameOf.set(cl, letterName(k));
-    used.add(letterName(k));
+    while (used.has(numberName(k))) k++;
+    nameOf.set(cl, numberName(k));
+    used.add(numberName(k));
   }
   let changed = 0;
   cur.segments.forEach((x, i) => {
@@ -337,8 +338,9 @@ function recluster(report) {
 }
 
 function addSpeaker() {
-  const letter = String.fromCharCode(65 + cur.speakers.length);
-  cur.speakers.push(`發言人 ${letter}`);
+  let k = cur.speakers.length;
+  while (cur.speakers.includes(numberName(k))) k++;
+  cur.speakers.push(numberName(k));
   speakerIdx = cur.speakers.length - 1;
   renderSpeakers();
   queueSave();
@@ -424,9 +426,16 @@ function colorOf(name) {
 function renderSpeakers() {
   const box = $('#meet-speakers');
   box.textContent = '';
+  $('#meet-add-speaker').hidden = autoSpeakers();
+  if (!cur.speakers.length) {
+    box.append(h('span', { class: 'small muted' }, autoSpeakers()
+      ? '開始記錄後，App 會依聲音自動標出「發言人 1、2、3…」，再按 ✎ 改成真名。'
+      : '按「＋ 新增發言人」加入與會者。'));
+  }
   cur.speakers.forEach((name, i) => {
-    const chip = h('button', { class: 'chip', 'aria-pressed': String(i === speakerIdx), title: '點兩下可改名' },
-      h('span', { class: 'dot', style: `background:${COLORS[i % COLORS.length]}` }), name, i < 9 ? h('kbd', {}, String(i + 1)) : null);
+    const chip = h('button', { class: 'chip', 'aria-pressed': String(i === speakerIdx),
+      title: autoSpeakers() ? '點一下：把最新一句改成這個人' : '點一下：切換目前發言人' },
+      h('span', { class: 'dot', style: `background:${COLORS[i % COLORS.length]}` }), name, !autoSpeakers() && i < 9 ? h('kbd', {}, String(i + 1)) : null);
     chip.addEventListener('click', () => {
       speakerIdx = i;
       // In automatic mode a click corrects the newest line instead.
@@ -436,14 +445,39 @@ function renderSpeakers() {
       renderTranscript();
     });
     chip.addEventListener('dblclick', () => renameSpeaker(i));
-    box.append(chip);
+    const edit = h('button', { class: 'chip-edit', title: `把「${name}」改名`, 'aria-label': `把${name}改名` }, '✎ 改名');
+    edit.addEventListener('click', () => renameSpeaker(i));
+    box.append(h('span', { class: 'chip-group' }, chip, edit));
+  });
+}
+
+// 發言分析 tab: one row per speaker to rename after the meeting.
+function renderRenameList() {
+  const box = $('#meet-rename');
+  box.textContent = '';
+  if (!cur.speakers.length) return;
+  box.append(h('h3', {}, '幫發言人改名'));
+  cur.speakers.forEach((name, i) => {
+    const sample = cur.segments.find((x) => x.speaker === name);
+    const input = h('input', { type: 'text', value: name, 'aria-label': `${name} 的名字`, id: `rename-${i}` });
+    input.addEventListener('change', () => {
+      const v = input.value.trim();
+      if (!v || v === name || cur.speakers.includes(v)) { input.value = name; return; }
+      renameEverywhere(name, v);
+      queueSave();
+      renderAll();
+      showTab('speakers');
+    });
+    box.append(h('div', { class: 'rename-row' },
+      h('span', { class: 'dot', style: `background:${COLORS[i % COLORS.length]}` }), input,
+      sample ? h('span', { class: 'small muted' }, `例：「${sample.text.slice(0, 40)}${sample.text.length > 40 ? '…' : ''}」`) : null));
   });
 }
 
 function renderSpeakerHint() {
   $('#meet-spk-hint').textContent = autoSpeakers()
-    ? '自動分辨中：每一句會依聲音分給不同發言人。認錯時點發言人即可更正最新一句，點兩下可改名。'
-    : '目前發言人（點選切換，數字鍵 1–9），點兩下可改名';
+    ? '發言人（依聲音自動標記）：按 ✎ 改成真名；認錯人時點發言人，就會把最新一句改成他。'
+    : '目前發言人（點選切換，數字鍵 1–9），按 ✎ 改名';
 }
 
 function setSegmentSpeaker(seg, name) {
@@ -461,6 +495,7 @@ function setSegmentSpeaker(seg, name) {
 function renameSpeaker(i) {
   const old = cur.speakers[i];
   const chip = $('#meet-speakers').children[i];
+  if (!chip) return;
   const input = h('input', { type: 'text', value: old, 'aria-label': '發言人名稱', style: 'width:110px;padding:4px 8px' });
   chip.replaceWith(input);
   input.focus();
@@ -468,12 +503,13 @@ function renameSpeaker(i) {
   const done = () => {
     const v = input.value.trim();
     if (v && v !== old && !cur.speakers.includes(v)) {
-      cur.speakers[i] = v;
       renameEverywhere(old, v);
       queueSave();
     }
     renderSpeakers();
     renderTranscript();
+    renderBars();
+    renderNotes();
   };
   input.addEventListener('blur', done);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = old; input.blur(); } });
@@ -574,6 +610,7 @@ function renderNotes() {
 }
 
 function renderBars() {
+  renderRenameList();
   const box = $('#meet-bars');
   box.textContent = '';
   const stats = speakerStats(cur.segments);
@@ -639,13 +676,13 @@ async function summarize() {
   }
 }
 
-// Replace automatic labels ("發言人 A") with names people said in the meeting.
+// Replace automatic labels ("發言人 1") with names people said in the meeting.
 function applyNames(list) {
   const done = [];
   for (const x of list) {
     const name = (x.name || '').trim();
     const label = x.speaker;
-    if (!name || !/^發言人 [A-Z]$/.test(label)) continue;
+    if (!name || !AUTO_LABEL.test(label)) continue;
     if (!cur.speakers.includes(label) && cur.speakers.includes(name)) {
       // Already renamed earlier: point this run's owners at the name too.
       (cur.notes.actionItems || []).forEach((a) => { if (a.owner === label) a.owner = name; });

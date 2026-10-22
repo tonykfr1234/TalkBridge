@@ -291,3 +291,13 @@ table.actions td.due { white-space: nowrap; font-variant-numeric: tabular-nums; 
 .owners { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .owner-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; }
 .owner-card ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* Speaker chips with rename */
+.chip-group { display: inline-flex; align-items: center; gap: 2px; }
+.chip-edit { border: 0; background: none; color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px 6px; border-radius: 6px; white-space: nowrap; }
+.chip-edit:hover { background: var(--accent-soft); }
+.rename { display: grid; gap: 8px; margin-bottom: 16px; }
+.rename-row { display: grid; grid-template-columns: 12px minmax(0, 160px) minmax(0, 1fr); gap: 10px; align-items: center; }
+.rename-row .dot { width: 10px; height: 10px; border-radius: 50%; }
+.rename-row input { width: 100%; }
+@media (max-width: 720px) { .rename-row { grid-template-columns: 12px minmax(0, 1fr); } .rename-row .muted { grid-column: 2; } }

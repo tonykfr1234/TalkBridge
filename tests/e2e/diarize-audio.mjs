@@ -108,6 +108,7 @@ await page.goto(`http://127.0.0.1:${server.address().port}/#meet`);
 await page.selectOption('#meet-lang', 'en');
 await page.selectOption('#meet-tr', '');
 assert.equal(await page.isChecked('#meet-auto-spk'), true, 'automatic speakers on by default');
+assert.match(await page.textContent('#meet-speakers'), /自動標出「發言人 1、2、3…」/);
 await page.click('#meet-start');
 await page.waitForSelector('#meet-stop:not([hidden])');
 const t0 = Date.now();
@@ -134,6 +135,28 @@ console.log('voices:', TURNS.map(([v]) => v).join(' '));
 console.log('live  :', live.join(' | '));
 console.log('final :', final.join(' | '));
 assert.ok(check(final), 'after the meeting each voice has its own label');
+assert.deepEqual([...new Set(final)].sort(), ['發言人 1', '發言人 2', '發言人 3']);
+
+// Rename speaker 1 with its ✎ button, speaker 2 from the 發言分析 list.
+const first = final[0];
+await page.click(`.chip-edit[aria-label="把${first}改名"]`);
+await page.fill('#meet-speakers input', '王經理');
+await page.press('#meet-speakers input', 'Enter');
+await page.click('[data-mtab=speakers]');
+const second = final[1];
+const idx = await page.$$eval('#meet-rename input', (xs, n) => xs.findIndex((x) => x.value === n), second);
+await page.fill(`#rename-${idx}`, 'Amy');
+await page.press(`#rename-${idx}`, 'Tab');
+await page.click('[data-mtab=transcript]');
+const renamed = await page.$$eval('#meet-transcript .seg select', (s) => s.map((x) => x.value));
+assert.deepEqual(renamed, final.map((x) => (x === first ? '王經理' : x === second ? 'Amy' : x)));
+assert.match(await page.textContent('#meet-speakers'), /王經理.*Amy/);
+if (process.argv.includes('--shots')) {
+  await page.evaluate(() => { document.querySelector('#toast').hidden = true; });
+  await (await page.$('#meet-live')).screenshot({ path: join(ROOT, 'docs/media/speakers.png') });
+  await page.click('[data-mtab=speakers]');
+  await (await page.$('#meet-doc')).screenshot({ path: join(ROOT, 'docs/media/speaker-rename.png') });
+}
 assert.deepEqual(errors, []);
 console.log(`\nspeaker separation passed (live labels ${check(live) ? 'already correct' : 'corrected after the meeting'})`);
 await browser.close();

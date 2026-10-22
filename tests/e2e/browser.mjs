@@ -91,13 +91,13 @@ const MINUTES = {
   title: '越南工廠出貨週會', summary: '越南工廠出貨落後兩天，決定先空運補貨。',
   keyPoints: ['出貨落後兩天', '先空運一批'], decisions: ['先空運一批'],
   actionItems: [
-    { task: '完成越南工廠補貨', owner: '發言人 B', ownerSource: 'stated', dueDate: '2026-10-30', dueText: '週五前', priority: 'high', quote: '出貨進度落後兩天，需要在週五前完成補貨。' },
+    { task: '完成越南工廠補貨', owner: '發言人 2', ownerSource: 'stated', dueDate: '2026-10-30', dueText: '週五前', priority: 'high', quote: '出貨進度落後兩天，需要在週五前完成補貨。' },
     { task: '確認空運預算', owner: '', ownerSource: 'none', dueDate: '', dueText: '', priority: 'medium', quote: '' },
   ],
   openQuestions: ['預算由誰確認'],
   speakers: [
-    { speaker: '發言人 A', name: '', role: '主持人', mainPoints: ['主持會議'], stance: '主導決策' },
-    { speaker: '發言人 B', name: '阿明', role: '工廠窗口', mainPoints: ['回報出貨延誤'], stance: '說明原因' },
+    { speaker: '發言人 1', name: '', role: '主持人', mainPoints: ['主持會議'], stance: '主導決策' },
+    { speaker: '發言人 2', name: '阿明', role: '工廠窗口', mainPoints: ['回報出貨延誤'], stance: '說明原因' },
   ],
   englishSummary: 'Shipments from the Vietnam plant are two days late; an air shipment was approved.',
 };
@@ -127,7 +127,7 @@ await context.route('https://api.anthropic.com/**', async (route) => {
   if (schemaKeys.includes('actionItems')) {
     text = JSON.stringify(MINUTES);
   } else if (schemaKeys.includes('labels')) {
-    text = JSON.stringify({ labels: [{ i: 0, speaker: '發言人 A' }, { i: 1, speaker: '發言人 B' }, { i: 2, speaker: '發言人 A' }], note: '依問答內容判斷，信心中等。' });
+    text = JSON.stringify({ labels: [{ i: 0, speaker: '發言人 1' }, { i: 1, speaker: '發言人 2' }, { i: 2, speaker: '發言人 1' }], note: '依問答內容判斷，信心中等。' });
   } else if (schemaKeys.includes('reply')) {
     text = JSON.stringify({ reply: 'Hello! Welcome to our office.', replyZh: '你好！歡迎來到我們辦公室。', romanization: '', feedback: '', better: '' });
   }
@@ -220,7 +220,7 @@ await step('meeting: transcript, speakers, recording, save', async () => {
   await page.waitForFunction(() => document.querySelectorAll('#meet-transcript .seg:not(.interim)').length === 3);
   await page.waitForSelector(`#meet-transcript .tr:text("${sel(tr('好，那我們決定先空運一批。', 'en'))}")`);
   const speakers = await page.$$eval('#meet-transcript .seg select', (s) => s.map((x) => x.value));
-  assert.deepEqual(speakers, ['發言人 A', '發言人 B', '發言人 A']);
+  assert.deepEqual(speakers, ['發言人 1', '發言人 2', '發言人 1']);
   await page.waitForTimeout(1200);
   await page.click('#meet-stop');
   await page.waitForSelector('#meet-history button');
@@ -238,7 +238,7 @@ await step('meeting: offline notes and exports', async () => {
   const dlt = await dl;
   assert.match(dlt.suggestedFilename(), /^TalkBridge_\d{8}-\d{4}_transcript\.txt$/);
   const txt = await readFile(await dlt.path(), 'utf8');
-  assert.match(txt, /發言人 B：出貨進度落後兩天/);
+  assert.match(txt, /發言人 2：出貨進度落後兩天/);
   assert.ok(txt.includes(tr('好，那我們決定先空運一批。', 'en')));
   const dla = page.waitForEvent('download');
   await page.click('[data-export=audio]');
@@ -266,9 +266,9 @@ await step('meeting: DeepSeek minutes with owners, due dates and speaker names',
   assert.equal(rows[0][3], '高');
   assert.equal(rows[1][0], '未指定負責人');
   assert.equal(rows[1][2], '未指定期限');
-  assert.match(await page.textContent('#sum-status'), /發言人 B 改名為 阿明/);
+  assert.match(await page.textContent('#sum-status'), /發言人 2 改名為 阿明/);
   const speakers = await page.$$eval('#meet-transcript .seg select', (s) => s.map((x) => x.value));
-  assert.deepEqual(speakers, ['發言人 A', '阿明', '發言人 A']);
+  assert.deepEqual(speakers, ['發言人 1', '阿明', '發言人 1']);
   const req = chatRequests.find((r) => r.body.response_format);
   assert.equal(req.url, 'https://api.deepseek.com/chat/completions');
   assert.equal(req.body.model, 'deepseek-chat');

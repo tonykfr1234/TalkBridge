@@ -55,7 +55,7 @@ The included GitHub Actions workflow publishes the app to GitHub Pages on every 
 | 22 languages | Chinese (Taiwan / Simplified / Cantonese), English, Vietnamese, Thai, Japanese, Korean, Indonesian, Malay, Filipino, Khmer, Burmese, Hindi, Spanish, French, German, Italian, Portuguese, Russian, Arabic, Turkish |
 | Subtitle mode | Large broadcast-style captions with the original line above. Interim words are translated every 0.7 s so captions keep up with the speaker. Full-screen, font size, top/bottom position, `.srt` export |
 | Meeting minutes | Live transcript with timestamps, optional parallel translation (e.g. Chinese → English), audio recording with a level meter, pause/resume, autosave to the device |
-| Automatic speakers | Each recognized phrase gets a voice fingerprint (timbre and pitch) from the microphone audio and is grouped with similar phrases, so lines are labelled 發言人 A, B, C… without tapping anything. When the meeting ends the whole meeting is grouped again. Tap a speaker to correct the newest line; corrections teach the grouping and are never overwritten. Manual mode (keys **1–9**) is still available |
+| Automatic speakers | Each recognized phrase gets a voice fingerprint (timbre and pitch) from the microphone audio and is grouped with similar phrases, so lines are labelled 發言人 1, 2, 3… without tapping anything; tap ✎ next to a speaker (or use the list on the speaker tab) to give them a real name. When the meeting ends the whole meeting is grouped again. Tap a speaker to correct the newest line; corrections teach the grouping and are never overwritten. Manual mode (keys **1–9**) is still available |
 | Minutes and action items | AI minutes: summary, key points, decisions, open questions, per-speaker roles and an English summary. Every action item has an owner, a due date resolved to the calendar ("下週五" → 10/30 Fri) with the original words, a priority and the source line; missing owners or dates are flagged in red. A second list groups tasks by owner. Real names said in the meeting ("我是王經理") replace the automatic labels. Offline mode finds likely tasks, owners and dates without AI |
 | AI providers | DeepSeek (default, `deepseek-chat`), OpenAI (`gpt-4.1-mini` by default, strict JSON schema) or Claude (Opus 5.5 by default through the official SDK). Each key is stored only in this browser |
 | Export and share | `.txt` transcript, `.md` minutes, `.srt` subtitles, `.json`, original audio. **Share** opens the phone's share sheet so LINE receives the files; **LINE** button sends the summary text |
@@ -74,6 +74,8 @@ A single microphone cannot tell voices apart, so speaker labels come from you. T
 | <img src="docs/media/talk.png" alt="Two-way interpreter" width="420"> | <img src="docs/media/subtitles.png" alt="Translated subtitles" width="420"> |
 | **Meeting minutes** | **Practice** |
 | <img src="docs/media/meeting.png" alt="Meeting minutes" width="420"> | <img src="docs/media/practice.png" alt="Phrase practice" width="420"> |
+
+<p align="center"><img src="docs/media/speakers.png" alt="Speakers detected by voice, renamed with ✎" width="640"></p>
 
 <p align="center"><img src="docs/media/action-items.png" alt="Action items: owner, due date, priority, missing items flagged" width="640"></p>
 

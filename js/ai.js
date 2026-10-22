@@ -234,7 +234,7 @@ export async function aiMinutes(transcript, { outLang = 'zh-TW', meetingDay = ''
   return ask({
     system: 'You write accurate meeting minutes from speech-to-text transcripts. Transcripts contain '
       + 'recognition errors; infer the intended words from context but never invent facts, owners or dates. '
-      + 'Speaker labels such as "發言人 A" come from automatic voice grouping and may be imperfect.',
+      + 'Speaker labels such as "發言人 1" come from automatic voice grouping and may be imperfect.',
     messages: [{
       role: 'user',
       content: `Meeting date: ${meetingDay}. Write the minutes in ${LANG_NAMES[outLang] || outLang}.\n\n`
