@@ -23,7 +23,7 @@ Open https://tonykfr1234.github.io/TalkBridge/ in Chrome or Edge → allow the m
 
 TalkBridge turns a phone or laptop into a pocket interpreter. Speak Chinese and it says it in English; the other person answers in English and it says it in Chinese. Put the device next to a computer speaker and it captions videos and online meetings in your language. In meetings it records audio, writes a live transcript with speaker labels and a parallel translation, then produces minutes, action items and an English summary you can export or send through LINE. A practice mode drills business and travel phrases in English, Vietnamese and Thai with pronunciation scoring, and an AI role-play partner corrects you as you talk.
 
-Everything runs in the browser. Meetings and progress stay on the device. Claude features are optional and use your own Anthropic API key.
+Everything runs in the browser. Meetings and progress stay on the device. AI features are optional and use your own API key for DeepSeek (default), OpenAI or Claude.
 
 The 12 README languages translate the documentation. The application interface currently uses Traditional Chinese.
 
@@ -34,7 +34,7 @@ The 12 README languages translate the documentation. The application interface c
 2. Allow the microphone when asked. Choose your language and the other person's language on the **口譯 (Interpreter)** tab.
 3. Press **開始自動口譯 (Start)** and speak. Translations appear as chat bubbles and are read aloud.
 4. Optional: install it (**Settings → 安裝到主畫面**, or the browser's *Install app* menu) so it opens full-screen like a native app.
-5. Optional: paste an Anthropic API key in **設定 (Settings)** to enable AI minutes, speaker suggestions, AI translation and the role-play tutor.
+5. Optional: in **設定 (Settings)** choose DeepSeek, OpenAI or Claude and paste your API key to enable AI minutes, real names for speakers, AI translation and the role-play tutor.
 
 **Run your own copy:** clone the repository and serve the folder over HTTPS or `localhost` (microphone access requires a secure origin):
 
@@ -55,12 +55,13 @@ The included GitHub Actions workflow publishes the app to GitHub Pages on every 
 | 22 languages | Chinese (Taiwan / Simplified / Cantonese), English, Vietnamese, Thai, Japanese, Korean, Indonesian, Malay, Filipino, Khmer, Burmese, Hindi, Spanish, French, German, Italian, Portuguese, Russian, Arabic, Turkish |
 | Subtitle mode | Large broadcast-style captions with the original line above. Interim words are translated every 0.7 s so captions keep up with the speaker. Full-screen, font size, top/bottom position, `.srt` export |
 | Meeting minutes | Live transcript with timestamps, optional parallel translation (e.g. Chinese → English), audio recording with a level meter, pause/resume, autosave to the device |
-| Speaker labels | Tap a speaker chip or press **1–9** to label who is talking; double-click to rename; fix any line afterwards. AI can suggest labels from the content |
-| Notes and analysis | AI minutes: summary, key points, decisions, action items (task / owner / due), open questions, per-speaker roles and an English summary. Offline mode extracts key sentences, likely action items and questions without AI. Talk-share bars per speaker |
+| Automatic speakers | Each recognized phrase gets a voice fingerprint (timbre and pitch) from the microphone audio and is grouped with similar phrases, so lines are labelled 發言人 A, B, C… without tapping anything. When the meeting ends the whole meeting is grouped again. Tap a speaker to correct the newest line; corrections teach the grouping and are never overwritten. Manual mode (keys **1–9**) is still available |
+| Minutes and action items | AI minutes: summary, key points, decisions, open questions, per-speaker roles and an English summary. Every action item has an owner, a due date resolved to the calendar ("下週五" → 10/30 Fri) with the original words, a priority and the source line; missing owners or dates are flagged in red. A second list groups tasks by owner. Real names said in the meeting ("我是王經理") replace the automatic labels. Offline mode finds likely tasks, owners and dates without AI |
+| AI providers | DeepSeek (default, `deepseek-chat`), OpenAI (`gpt-4.1-mini` by default, strict JSON schema) or Claude (Opus 5.5 by default through the official SDK). Each key is stored only in this browser |
 | Export and share | `.txt` transcript, `.md` minutes, `.srt` subtitles, `.json`, original audio. **Share** opens the phone's share sheet so LINE receives the files; **LINE** button sends the summary text |
 | Language practice | 8 scenarios × 6 phrases (meetings, negotiation, calls, factory, business dinner, travel, shopping, introductions) in English, Vietnamese and Thai with Thai romanization and male/female polite forms; Japanese, Korean and Indonesian generated on demand |
 | Pronunciation scoring | Play, slow play, then speak: the recognizer's transcript is aligned with the target sentence, scored 0–100 and missing words are marked. ≥ 85 marks the phrase as learned; a daily streak tracks practice |
-| AI role-play | Claude plays the counterpart in the chosen scenario, replies in the target language with a Chinese translation and romanization, and corrects your last sentence |
+| AI role-play | The AI plays the counterpart in the chosen scenario, replies in the target language with a Chinese translation and romanization, and corrects your last sentence |
 | Study guides | Tone charts and practical tips per language (Vietnamese six tones and pronouns, Thai tones and polite particles, English linking sounds, Japanese/Korean politeness) |
 
 A single microphone cannot tell voices apart, so speaker labels come from you. The AI suggestion is based on what was said, not on voiceprints.
@@ -74,6 +75,8 @@ A single microphone cannot tell voices apart, so speaker labels come from you. T
 | **Meeting minutes** | **Practice** |
 | <img src="docs/media/meeting.png" alt="Meeting minutes" width="420"> | <img src="docs/media/practice.png" alt="Phrase practice" width="420"> |
 
+<p align="center"><img src="docs/media/action-items.png" alt="Action items: owner, due date, priority, missing items flagged" width="640"></p>
+
 <p align="center"><img src="docs/media/phone-dark.png" alt="Phone, dark theme" width="220"></p>
 
 Screenshots come from the automated browser test with simulated speech and sample translations (`npm run shots`).
@@ -86,12 +89,13 @@ microphone ─► Web Speech API (browser) ─► text ─► translation ─►
                                                     │                 │
                                    Google (free) → MyMemory → Claude  └─► speechSynthesis (read aloud)
 meeting audio ─► MediaRecorder ─► IndexedDB (this device) ─► export / share sheet / LINE
-transcript ─► Claude (your key, structured JSON) ─► minutes, action items, speaker suggestions
+transcript ─► DeepSeek / OpenAI / Claude (your key, JSON) ─► minutes, owners, due dates, speaker names
 ```
 
 - **Recognition** uses the browser's built-in speech service. Chrome sends audio to Google's recognizer, so it needs a connection. The recognizer restarts automatically after browser timeouts.
 - **Translation** tries the free Google endpoint, falls back to MyMemory, then to Claude if a key is set. Choose **Claude AI translation** in Settings for more natural business wording.
-- **Claude** calls use the official Anthropic TypeScript SDK, bundled in `js/vendor/`, with structured outputs for minutes and tutoring, adaptive thinking and server-side refusal fallback. The default model is Claude Opus 5.5; Sonnet 5.5 and Haiku 5.5 are selectable.
+- **AI** calls go to the provider chosen in Settings. DeepSeek and OpenAI use their Chat Completions APIs (DeepSeek in JSON mode with the schema in the prompt, repaired to shape; OpenAI with a strict JSON schema). Claude uses the official Anthropic TypeScript SDK, bundled in `js/vendor/`, with structured outputs, adaptive thinking and server-side refusal fallback.
+- **Speakers** are separated on the device: MFCC timbre averages and median pitch per phrase, compared in units of the meeting's own spread, grouped online during the meeting and by average-linkage clustering at the end. Audio never leaves the browser for this.
 - **Storage**: settings and practice progress in `localStorage`, meetings and audio in IndexedDB. Nothing is uploaded except the text sent for translation and, if you enable it, to Claude.
 
 <a id="faq"></a>
@@ -105,7 +109,9 @@ transcript ─► Claude (your key, structured JSON) ─► minutes, action item
 
 **Does auto mode always pick the right speaker?** It decides by script first (Chinese characters vs. Latin vs. Thai), then by the translator's detected language, and expects turns to alternate. Two languages in the same script (e.g. English and Spanish) rely on detection alone; use push-to-talk for those.
 
-**Is my API key safe?** It stays in this browser's storage and is sent only to `api.anthropic.com`. Use a key with a spending limit, and clear it on shared computers.
+**Is my API key safe?** It stays in this browser's storage and is sent only to the provider you chose (`api.deepseek.com`, `api.openai.com` or `api.anthropic.com`). The app never ships with a key built in: anything in a public site's code can be copied by anyone. Use a key with a spending limit and clear it on shared computers.
+
+**How accurate is automatic speaker separation?** In the test conversation (three synthetic voices, two of them similar men) every line was assigned correctly, live and after the meeting. Real rooms are harder: similar voices, people talking over each other, or one person far from the microphone can merge or split speakers. Correct a line once and later lines follow.
 
 <a id="documentation"></a>
 ## Documentation
@@ -119,7 +125,8 @@ transcript ─► Claude (your key, structured JSON) ─► minutes, action item
 ```bash
 npm install             # Playwright, used only by the browser test
 npm test                # unit tests (node:test)
-npm run test:e2e        # headless Chromium with simulated speech, mocked translation and Claude
+npm run test:e2e        # headless Chromium with simulated speech, mocked translation and AI providers
+npm run test:voices     # automatic speaker separation on real synthetic voices (needs ffmpeg with flite)
 npm run shots           # same test, also refreshes docs/media screenshots
 python3 scripts/security_scan.py .
 python3 scripts/generate_icon.py

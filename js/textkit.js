@@ -1,6 +1,8 @@
 // Pure text helpers (no DOM): pronunciation scoring, transcript exports,
 // offline meeting summary and speaker statistics. Covered by tests/textkit.test.mjs.
 
+import { parseDue, formatDue } from './duedate.js';
+
 const PUNCT = /[\s\p{P}\p{S}]+/gu;
 
 export function normalize(s) {
@@ -105,9 +107,15 @@ export function toMarkdown(m) {
     out.push('', '## 摘要', '', n.summary || '');
     if (n.keyPoints && n.keyPoints.length) out.push('', '## 重點', '', ...n.keyPoints.map((k) => `- ${k}`));
     if (n.decisions && n.decisions.length) out.push('', '## 決議', '', ...n.decisions.map((k) => `- ${k}`));
-    if (n.actionItems && n.actionItems.length) {
-      out.push('', '## 待辦事項', '', '| 事項 | 負責人 | 期限 |', '| --- | --- | --- |',
-        ...n.actionItems.map((a) => `| ${a.task} | ${a.owner || '—'} | ${a.due || '—'} |`));
+    const items = sortActions(upgradeActions(n.actionItems));
+    if (items.length) {
+      const cell = (v) => String(v).replace(/\|/g, '／').replace(/\n/g, ' ');
+      out.push('', '## 待辦事項', '', '| 負責人 | 事項 | 期限 | 優先 |', '| --- | --- | --- | --- |',
+        ...items.map((a) => `| ${cell(ownerLabel(a))} | ${cell(a.task)} | ${cell(dueLabel(a))} | ${PRIORITY[a.priority] || '—'} |`));
+      out.push('', '### 依負責人', '');
+      for (const g of groupByOwner(items)) {
+        out.push(`**${g.owner}**`, ...g.items.map((a) => `- [ ] ${a.task}（${dueLabel(a)}）`), '');
+      }
     }
     if (n.openQuestions && n.openQuestions.length) out.push('', '## 待確認', '', ...n.openQuestions.map((k) => `- ${k}`));
     if (n.englishSummary) out.push('', '## English summary', '', n.englishSummary);
@@ -126,8 +134,12 @@ export function toShareText(m, limit = 900) {
   if (n) {
     if (n.summary) lines.push('', n.summary);
     if (n.keyPoints && n.keyPoints.length) lines.push('', '重點：', ...n.keyPoints.slice(0, 6).map((k) => `・${k}`));
-    if (n.actionItems && n.actionItems.length) {
-      lines.push('', '待辦：', ...n.actionItems.slice(0, 6).map((a) => `・${a.task}${a.owner ? `（${a.owner}）` : ''}${a.due ? ` ${a.due}` : ''}`));
+    const items = sortActions(upgradeActions(n.actionItems));
+    if (items.length) {
+      lines.push('', '待辦（負責人／期限）：');
+      for (const g of groupByOwner(items)) {
+        lines.push(`▸ ${g.owner}`, ...g.items.map((a) => `  ・${a.task}｜${dueLabel(a)}`));
+      }
     }
   } else {
     lines.push('', ...m.segments.slice(0, 12).map((s) => `${s.speaker ? s.speaker + '：' : ''}${s.text}`));
@@ -135,6 +147,63 @@ export function toShareText(m, limit = 900) {
   let text = lines.join('\n');
   if (text.length > limit) text = text.slice(0, limit - 1) + '…';
   return text;
+}
+
+// ---- action items ----
+// { task, owner, ownerSource, dueDate (YYYY-MM-DD), dueText, priority, quote }
+export const PRIORITY = { high: '高', medium: '中', low: '低' };
+export const NO_OWNER = '未指定負責人';
+export const NO_DUE = '未指定期限';
+
+export function ownerLabel(a) { return (a.owner || '').trim() || NO_OWNER; }
+
+export function dueLabel(a) {
+  const d = formatDue(a.dueDate || a.due || '');
+  if (d) return a.dueText && !/^\d/.test(a.dueText) ? `${d}・${a.dueText}` : d;
+  return a.dueText ? `${a.dueText}（日期待確認）` : NO_DUE;
+}
+
+// Dated items first (soonest first), then undated; high priority first within a day.
+export function sortActions(items) {
+  const rank = { high: 0, medium: 1, low: 2 };
+  return [...items].sort((x, y) => {
+    const dx = x.dueDate || '9999', dy = y.dueDate || '9999';
+    return dx < dy ? -1 : dx > dy ? 1 : (rank[x.priority] ?? 1) - (rank[y.priority] ?? 1);
+  });
+}
+
+export function groupByOwner(items) {
+  const map = new Map();
+  for (const a of items) {
+    const k = ownerLabel(a);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(a);
+  }
+  return [...map.entries()]
+    .sort(([a], [b]) => (a === NO_OWNER) - (b === NO_OWNER))
+    .map(([owner, list]) => ({ owner, items: list }));
+}
+
+// Older saved meetings stored { task, owner, due }.
+export function upgradeActions(items) {
+  return (items || []).map((a) => ({
+    task: a.task || '', owner: a.owner || '', ownerSource: a.ownerSource || (a.owner ? 'inferred' : 'none'),
+    dueDate: a.dueDate || (/^\d{4}-\d{2}-\d{2}$/.test(a.due || '') ? a.due : ''),
+    dueText: a.dueText ?? (a.due && !/^\d{4}-/.test(a.due) ? a.due : ''),
+    priority: a.priority || 'medium', quote: a.quote || '',
+  }));
+}
+
+// Someone named in a request: "請小王…", "小王負責…", "交給 Amy".
+const OWNER_RE = /(?:請|麻煩|交給|由)\s*([A-Za-z]{2,12}|[\u4e00-\u9fff]{2,3}?)(?=負責|來|去|幫|處理|跟進|確認|準備|寄|提供|在|把|於|下|明|今|這|本|月|週|周|\d|，|,|\s)|([\u4e00-\u9fff]{2,3}|[A-Z][a-z]{1,11})\s*(?:負責|會負責|來負責)/;
+
+export function guessOwner(text, speaker) {
+  const m = text.match(OWNER_RE);
+  if (m) return { owner: m[1] || m[2], ownerSource: 'stated' };
+  if (/^(我|我們|我会|我會|I will|I'll|we will|we'll)/i.test(text.trim()) || /我(來|会|會)/.test(text)) {
+    return { owner: speaker || '', ownerSource: speaker ? 'inferred' : 'none' };
+  }
+  return { owner: speaker || '', ownerSource: speaker ? 'inferred' : 'none' };
 }
 
 // ---- speaker statistics ----
@@ -173,7 +242,7 @@ function keyTerms(text) {
   return n.split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w));
 }
 
-export function localNotes(segments, { maxPoints = 6 } = {}) {
+export function localNotes(segments, { maxPoints = 6, meetingDate = new Date() } = {}) {
   const freq = new Map();
   segments.forEach((s) => keyTerms(s.text).forEach((g) => freq.set(g, (freq.get(g) || 0) + 1)));
   const scored = segments.map((s, i) => {
@@ -183,8 +252,17 @@ export function localNotes(segments, { maxPoints = 6 } = {}) {
   }).filter((x) => units(x.s.text).length >= 6);
   const top = scored.sort((a, b) => b.score - a.score).slice(0, maxPoints).sort((a, b) => a.i - b.i);
   const keywords = [...freq.entries()].filter(([, c]) => c > 1).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([g]) => g);
-  const actionItems = segments.filter((s) => ACTION_RE.test(s.text)).slice(0, 10)
-    .map((s) => ({ task: s.text, owner: s.speaker || '', due: '' }));
+  const actionItems = segments.filter((s) => ACTION_RE.test(s.text)).slice(0, 12).map((s) => {
+    const due = parseDue(s.text, meetingDate);
+    return {
+      task: s.text,
+      ...guessOwner(s.text, s.speaker),
+      dueDate: due ? due.date : '',
+      dueText: due ? due.text : '',
+      priority: /(急|馬上|立刻|客戶|urgent|asap)/i.test(s.text) ? 'high' : 'medium',
+      quote: s.text,
+    };
+  });
   const decisions = segments.filter((s) => DECISION_RE.test(s.text)).slice(0, 8).map((s) => s.text);
   return {
     title: '',

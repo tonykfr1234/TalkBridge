@@ -1,9 +1,13 @@
-// 會議: live transcript + audio recording, speaker tags, minutes, export and share.
+// 會議: live transcript + audio recording, automatic speaker separation,
+// minutes with owners and due dates, export and share.
 import { byCode } from '../langs.js';
 import { translate } from '../translate.js';
 import { Recognizer, recognizerErrorText, canRecognize, AudioRecorder, levelMeter, extForMime } from '../speech.js';
 import { settings, meetings } from '../store.js';
-import { clock, toTXT, toSRT, toMarkdown, toShareText, speakerStats, localNotes } from '../textkit.js';
+import { clock, toTXT, toSRT, toMarkdown, toShareText, speakerStats, localNotes, ownerLabel, dueLabel, sortActions,
+  groupByOwner, upgradeActions, NO_OWNER, NO_DUE, PRIORITY } from '../textkit.js';
+import { FeatureExtractor, embed, OnlineDiarizer, clusterAll } from '../diarize.js';
+import { meetingDayLabel } from '../duedate.js';
 import { aiMinutes, aiDiarize, hasAI, friendlyError } from '../ai.js';
 import { $, $$, h, fillLangSelect, toast, download, copyText, lineShareUrl, shareFiles, keepAwake, fileStamp } from '../ui.js';
 
@@ -22,6 +26,13 @@ let speakerIdx = 0;
 let interimText = '';
 let saveTimer = 0;
 let audioUrl = '';
+// Automatic speaker separation while recording.
+let voice = null;        // { ctx, node, stream, own } audio tap for voice fingerprints
+let fx = null;           // FeatureExtractor
+let frames = [];         // frames since the previous recognized phrase
+let diarizer = null;     // OnlineDiarizer
+const autoSpeakers = () => settings.get('meetAutoSpeaker') !== false;
+const letterName = (i) => `發言人 ${String.fromCharCode(65 + i)}`;
 
 export const meetingBusy = () => running;
 
@@ -34,7 +45,7 @@ function blank() {
     durationMs: 0,
     lang: settings.get('meetLang'),
     trLang: settings.get('meetTranslate'),
-    speakers: ['發言人 A', '發言人 B', '發言人 C'],
+    speakers: autoSpeakers() ? [] : ['發言人 A', '發言人 B', '發言人 C'],
     segments: [],
     notes: null,
     audio: null,
@@ -56,6 +67,13 @@ export function initMeet() {
   $('#sum-lang').addEventListener('change', (e) => settings.set('summaryLang', e.target.value));
   $('#meet-record').checked = settings.get('meetRecord');
   $('#meet-record').addEventListener('change', (e) => settings.set('meetRecord', e.target.checked));
+  $('#meet-auto-spk').checked = autoSpeakers();
+  $('#meet-auto-spk').addEventListener('change', (e) => {
+    settings.set('meetAutoSpeaker', e.target.checked);
+    if (!running && !cur.segments.length) { cur = blank(); renderAll(); }
+    renderSpeakerHint();
+  });
+  $('#meet-recluster').addEventListener('click', () => recluster(true));
 
   $('#meet-start').addEventListener('click', start);
   $('#meet-pause').addEventListener('click', togglePause);
@@ -67,10 +85,10 @@ export function initMeet() {
   $('#meet-summarize').addEventListener('click', summarize);
   $('#meet-local-sum').addEventListener('click', () => {
     if (!cur.segments.length) { toast('還沒有逐字稿'); return; }
-    cur.notes = localNotes(cur.segments);
+    cur.notes = localNotes(cur.segments, { meetingDate: new Date(cur.createdAt) });
     queueSave();
     renderNotes();
-    $('#sum-status').textContent = '離線整理只挑出關鍵句和可能的待辦，設定 Claude 金鑰後可產生完整摘要。';
+    $('#sum-status').textContent = '離線整理只挑出關鍵句和可能的待辦，設定 AI 金鑰（DeepSeek、OpenAI 或 Claude）後可產生完整摘要。';
   });
   $('#meet-diarize').addEventListener('click', diarize);
   $$('[data-export]').forEach((b) => b.addEventListener('click', () => exportAs(b.dataset.export)));
@@ -114,6 +132,9 @@ async function start() {
   paused = false;
   accumulated = 0;
   resumedAt = Date.now();
+  frames = [];
+  diarizer = autoSpeakers() ? new OnlineDiarizer() : null;
+  if (diarizer) await startVoiceTap(recorder && recorder.stream);
   rec = new Recognizer({
     lang: byCode(cur.lang).locale,
     onInterim: (t) => { interimText = t; renderInterim(); },
@@ -162,6 +183,7 @@ async function finish() {
   clearInterval(tick);
   keepAwake(false);
   if (stopMeter) { stopMeter(); stopMeter = null; }
+  stopVoiceTap();
   $('#meet-level').style.width = '0';
   if (recorder) {
     const blob = await recorder.stop();
@@ -169,6 +191,7 @@ async function finish() {
     recorder = null;
   }
   interimText = '';
+  if (autoSpeakers()) recluster(false);
   $('#meet-start').hidden = false;
   $('#meet-pause').hidden = true;
   $('#meet-stop').hidden = true;
@@ -181,9 +204,71 @@ async function finish() {
   showTab(cur.segments.length ? 'notes' : 'transcript');
 }
 
+// Tap the microphone for voice fingerprints. Reuses the recording stream
+// when there is one, otherwise opens the microphone just for analysis.
+async function startVoiceTap(stream) {
+  try {
+    let own = false;
+    if (!stream) { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); own = true; }
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    const src = ctx.createMediaStreamSource(stream);
+    const node = ctx.createScriptProcessor(4096, 1, 1);
+    fx = new FeatureExtractor(ctx.sampleRate);
+    node.onaudioprocess = (ev) => {
+      if (!running || paused) return;
+      const x = ev.inputBuffer.getChannelData(0);
+      const t0 = elapsed() - (x.length / ctx.sampleRate) * 1000;
+      for (const f of fx.push(x, t0)) frames.push(f);
+      if (frames.length > 6000) frames.splice(0, frames.length - 6000); // keep at most 60 s
+    };
+    src.connect(node);
+    node.connect(ctx.destination);
+    if (!stopMeter) stopMeter = levelMeter(stream, (v) => { $('#meet-level').style.width = Math.round(v * 100) + '%'; });
+    voice = { ctx, node, stream, own };
+  } catch {
+    voice = null;
+    toast('無法分析聲音，改為手動標記發言人。', 5000);
+  }
+}
+
+function stopVoiceTap() {
+  if (!voice) return;
+  try { voice.node.disconnect(); voice.ctx.close(); } catch { /* already closed */ }
+  if (voice.own) voice.stream.getTracks().forEach((t) => t.stop());
+  voice = null;
+}
+
+const round = (v) => v.map((x) => Math.round(x * 1000) / 1000);
+
+function ensureSpeaker(i) {
+  while (cur.speakers.length <= i) cur.speakers.push(letterName(cur.speakers.length));
+  return cur.speakers[i];
+}
+
 async function onFinal(text) {
   const t = elapsed();
-  const seg = { t: Math.max(0, t - Math.min(6000, text.length * 180)), end: t, speaker: cur.speakers[speakerIdx] || '', text, tr: '' };
+  // Audio since the previous phrase belongs to this one.
+  const mine = frames;
+  frames = [];
+  const voicedAt = mine.find((f) => f.voiced);
+  const start = voicedAt ? voicedAt.t : t - Math.min(6000, text.length * 180);
+  const seg = { t: Math.max(0, Math.round(start)), end: t, speaker: '', text, tr: '' };
+  if (diarizer) {
+    const e = embed(mine);
+    if (e) {
+      seg.emb = round(e);
+      seg.cl = diarizer.add(seg.emb);
+      speakerIdx = seg.cl;
+      seg.speaker = ensureSpeaker(seg.cl);
+    } else {
+      const prev = cur.segments[cur.segments.length - 1];
+      seg.speaker = prev ? prev.speaker : ensureSpeaker(0);
+    }
+    renderSpeakers();
+  } else {
+    seg.speaker = cur.speakers[speakerIdx] || '';
+  }
   cur.segments.push(seg);
   interimText = '';
   renderTranscript();
@@ -195,6 +280,60 @@ async function onFinal(text) {
       queueSave();
     } catch { /* keep transcript even if translation fails */ }
   }
+}
+
+// Re-group every fingerprint of the meeting at once (more accurate than the
+// live grouping, which decides each phrase as it arrives). Keeps names the
+// user gave and lines the user corrected by hand.
+function recluster(report) {
+  const withVoice = cur.segments.filter((x) => x.emb);
+  if (withVoice.length < 3) {
+    if (report) $('#recluster-status').textContent = '需要至少 3 句有聲音特徵的內容才能分析（自動分辨發言人開啟時錄的會議才有）。';
+    return 0;
+  }
+  const labels = clusterAll(cur.segments.map((x) => x.emb || null));
+  // Name each cluster after the speaker most of its lines already carry.
+  const votes = new Map();
+  cur.segments.forEach((x, i) => {
+    if (labels[i] < 0) return;
+    const v = votes.get(labels[i]) || new Map();
+    v.set(x.speaker, (v.get(x.speaker) || 0) + 1);
+    votes.set(labels[i], v);
+  });
+  const nameOf = new Map();
+  const used = new Set();
+  [...votes.entries()]
+    .sort((a, b) => Math.max(...b[1].values()) - Math.max(...a[1].values()))
+    .forEach(([cl, v]) => {
+      const pick = [...v.entries()].sort((a, b) => b[1] - a[1]).find(([name]) => name && !used.has(name));
+      const name = pick ? pick[0] : null;
+      if (name) { nameOf.set(cl, name); used.add(name); }
+    });
+  for (const cl of votes.keys()) {
+    if (nameOf.has(cl)) continue;
+    let k = 0;
+    while (used.has(letterName(k))) k++;
+    nameOf.set(cl, letterName(k));
+    used.add(letterName(k));
+  }
+  let changed = 0;
+  cur.segments.forEach((x, i) => {
+    if (labels[i] < 0 || x.manual) return;
+    const name = nameOf.get(labels[i]);
+    if (x.speaker !== name) { x.speaker = name; changed++; }
+  });
+  // Lines without a fingerprint follow the line before them.
+  cur.segments.forEach((x, i) => { if (labels[i] < 0 && !x.manual && i > 0) x.speaker = cur.segments[i - 1].speaker; });
+  const inUse = new Set(cur.segments.map((x) => x.speaker));
+  cur.speakers = [...cur.speakers.filter((n) => inUse.has(n)), ...[...inUse].filter((n) => !cur.speakers.includes(n))];
+  queueSave();
+  renderSpeakers();
+  renderTranscript();
+  renderBars();
+  if (report) {
+    $('#recluster-status').textContent = `分析完成：共 ${inUse.size} 位發言人，調整了 ${changed} 句。`;
+  }
+  return changed;
 }
 
 function addSpeaker() {
@@ -269,6 +408,7 @@ function renderAll() {
   $('#meet-timer').textContent = clock(running ? elapsed() : cur.durationMs);
   $('#meet-saved').textContent = '';
   $('#meet-delete').hidden = !cur.segments.length && !cur.audio;
+  renderSpeakerHint();
   renderSpeakers();
   renderTranscript();
   renderNotes();
@@ -287,10 +427,35 @@ function renderSpeakers() {
   cur.speakers.forEach((name, i) => {
     const chip = h('button', { class: 'chip', 'aria-pressed': String(i === speakerIdx), title: '點兩下可改名' },
       h('span', { class: 'dot', style: `background:${COLORS[i % COLORS.length]}` }), name, i < 9 ? h('kbd', {}, String(i + 1)) : null);
-    chip.addEventListener('click', () => { speakerIdx = i; renderSpeakers(); });
+    chip.addEventListener('click', () => {
+      speakerIdx = i;
+      // In automatic mode a click corrects the newest line instead.
+      const last = cur.segments[cur.segments.length - 1];
+      if (autoSpeakers() && running && last) setSegmentSpeaker(last, name);
+      renderSpeakers();
+      renderTranscript();
+    });
     chip.addEventListener('dblclick', () => renameSpeaker(i));
     box.append(chip);
   });
+}
+
+function renderSpeakerHint() {
+  $('#meet-spk-hint').textContent = autoSpeakers()
+    ? '自動分辨中：每一句會依聲音分給不同發言人。認錯時點發言人即可更正最新一句，點兩下可改名。'
+    : '目前發言人（點選切換，數字鍵 1–9），點兩下可改名';
+}
+
+function setSegmentSpeaker(seg, name) {
+  if (seg.speaker === name) return;
+  seg.speaker = name;
+  seg.manual = true;
+  if (diarizer && seg.emb) {
+    const to = cur.speakers.indexOf(name);
+    diarizer.teach(seg.emb, seg.cl ?? -1, to);
+    seg.cl = to;
+  }
+  queueSave();
 }
 
 function renameSpeaker(i) {
@@ -304,7 +469,7 @@ function renameSpeaker(i) {
     const v = input.value.trim();
     if (v && v !== old && !cur.speakers.includes(v)) {
       cur.speakers[i] = v;
-      cur.segments.forEach((s) => { if (s.speaker === old) s.speaker = v; });
+      renameEverywhere(old, v);
       queueSave();
     }
     renderSpeakers();
@@ -314,6 +479,17 @@ function renameSpeaker(i) {
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = old; input.blur(); } });
 }
 
+function renameEverywhere(old, name) {
+  const i = cur.speakers.indexOf(old);
+  if (i >= 0) cur.speakers[i] = name;
+  cur.segments.forEach((s) => { if (s.speaker === old) s.speaker = name; });
+  const n = cur.notes;
+  if (n) {
+    (n.actionItems || []).forEach((a) => { if (a.owner === old) a.owner = name; });
+    (n.speakers || []).forEach((x) => { if (x.speaker === old) x.speaker = name; });
+  }
+}
+
 function renderTranscript() {
   const box = $('#meet-transcript');
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
@@ -321,7 +497,7 @@ function renderTranscript() {
   cur.segments.forEach((s, i) => {
     const sel = h('select', { 'aria-label': '發言人', style: `color:${colorOf(s.speaker)}` },
       ...cur.speakers.map((n) => h('option', { value: n, selected: n === s.speaker }, n)));
-    sel.addEventListener('change', () => { s.speaker = sel.value; sel.style.color = colorOf(s.speaker); queueSave(); });
+    sel.addEventListener('change', () => { setSegmentSpeaker(s, sel.value); sel.style.color = colorOf(s.speaker); renderBars(); });
     const txt = h('span', { contenteditable: 'true', spellcheck: 'false' }, s.text);
     txt.addEventListener('blur', () => { const v = txt.textContent.trim(); if (v && v !== s.text) { s.text = v; queueSave(); } });
     const time = h('time', { title: '從這裡播放錄音' }, clock(s.t));
@@ -365,17 +541,32 @@ function renderNotes() {
   const n = cur.notes;
   if (!n) {
     box.append(h('p', { class: 'muted' }, cur.segments.length
-      ? (hasAI() ? '按「AI 整理重點」產生摘要、決議、待辦事項和英文版摘要。' : '按「離線快速整理」挑出關鍵句；在「設定」填入 Claude 金鑰可產生完整會議記錄與英文摘要。')
+      ? (hasAI() ? '按「AI 整理重點」產生摘要、決議、待辦事項和英文版摘要。' : '按「離線快速整理」挑出關鍵句；在「設定」填入 AI 金鑰可產生完整會議記錄與英文摘要。')
       : '會議結束後可在這裡整理重點。'));
     return;
   }
   if (n.title && n.title !== cur.title && !n.offline) box.append(h('p', { class: 'eyebrow' }, n.title));
   if (n.summary) box.append(h('p', {}, n.summary));
   [list('重點', n.keyPoints), list('決議', n.decisions)].forEach((x) => x && box.append(...x));
-  if (n.actionItems && n.actionItems.length) {
-    box.append(h('h3', {}, '待辦事項'), h('div', { class: 'table-wrap' }, h('table', {},
-      h('thead', {}, h('tr', {}, h('th', {}, '事項'), h('th', {}, '負責人'), h('th', {}, '期限'))),
-      h('tbody', {}, ...n.actionItems.map((a) => h('tr', {}, h('td', {}, a.task), h('td', {}, a.owner || '—'), h('td', {}, a.due || '—')))))));
+  const items = sortActions(upgradeActions(n.actionItems));
+  if (items.length) {
+    const missing = items.filter((a) => ownerLabel(a) === NO_OWNER || dueLabel(a) === NO_DUE || !a.dueDate).length;
+    box.append(h('h3', {}, `待辦事項（${items.length} 項）`));
+    if (missing) box.append(h('p', { class: 'small warn-note' }, `有 ${missing} 項缺負責人或明確日期，建議會後確認。`));
+    box.append(h('div', { class: 'table-wrap' }, h('table', { class: 'actions' },
+      h('thead', {}, h('tr', {}, h('th', {}, '負責人'), h('th', {}, '事項'), h('th', {}, '期限'), h('th', {}, '優先'))),
+      h('tbody', {}, ...items.map((a) => {
+        const owner = ownerLabel(a), due = dueLabel(a);
+        return h('tr', {},
+          h('td', {}, owner === NO_OWNER ? h('span', { class: 'missing' }, owner)
+            : h('span', {}, h('b', {}, owner), a.ownerSource === 'inferred' ? h('span', { class: 'muted small', title: '依發言者推斷' }, '（推斷）') : null)),
+          h('td', {}, a.task, a.quote && a.quote !== a.task ? h('div', { class: 'muted small' }, `「${a.quote}」`) : null),
+          h('td', { class: 'due' }, due === NO_DUE ? h('span', { class: 'missing' }, due) : !a.dueDate ? h('span', { class: 'missing' }, due) : due),
+          h('td', {}, h('span', { class: `prio ${a.priority || 'medium'}` }, PRIORITY[a.priority] || '中')));
+      })))));
+    box.append(h('h3', {}, '依負責人'), h('div', { class: 'owners' }, ...groupByOwner(items).map((g) => h('div', { class: 'owner-card' },
+      h('b', { class: g.owner === NO_OWNER ? 'missing' : '' }, g.owner),
+      h('ul', {}, ...g.items.map((a) => h('li', {}, a.task, h('span', { class: 'muted small' }, `　${dueLabel(a)}`))))))));
   }
   const q = list('待確認問題', n.openQuestions);
   if (q) box.append(...q);
@@ -399,7 +590,7 @@ function renderBars() {
   if (sp && sp.length) {
     for (const s of sp) {
       notes.append(h('div', { class: 'card', style: 'box-shadow:none;margin-bottom:8px' },
-        h('b', {}, s.speaker), s.role ? h('span', { class: 'muted small' }, `　${s.role}`) : null,
+        h('b', {}, s.speaker), s.name && s.name !== s.speaker ? h('span', { class: 'small' }, `（${s.name}）`) : null, s.role ? h('span', { class: 'muted small' }, `　${s.role}`) : null,
         s.stance ? h('p', { class: 'small', style: 'margin:4px 0' }, s.stance) : null,
         s.mainPoints && s.mainPoints.length ? h('ul', { class: 'small' }, ...s.mainPoints.map((p) => h('li', {}, p))) : null));
     }
@@ -428,18 +619,19 @@ function transcriptForAI() {
 
 async function summarize() {
   if (!cur.segments.length) { toast('還沒有逐字稿'); return; }
-  if (!hasAI()) { toast('請先到「設定」填入 Claude API 金鑰，或使用離線快速整理。', 5000); return; }
+  if (!hasAI()) { toast('請先到「設定」填入 AI 金鑰（DeepSeek、OpenAI 或 Claude），或使用離線快速整理。', 5000); return; }
   const btn = $('#meet-summarize');
   btn.disabled = true;
-  $('#sum-status').textContent = 'Claude 正在整理會議重點，長會議約需 30–90 秒…';
+  $('#sum-status').textContent = 'AI 正在整理會議重點，長會議約需 30–90 秒…';
   try {
-    const notes = await aiMinutes(transcriptForAI(), { outLang: settings.get('summaryLang') });
+    const notes = await aiMinutes(transcriptForAI(), { outLang: settings.get('summaryLang'), meetingDay: meetingDayLabel(new Date(cur.createdAt)) });
     cur.notes = notes;
     if (notes.title && /^會議 \d/.test(cur.title)) cur.title = notes.title;
+    const renamed = applyNames(notes.speakers || []);
     await saveNow();
     renderAll();
     renderHistory();
-    $('#sum-status').textContent = '完成。AI 摘要可能有誤，重要內容請對照逐字稿或錄音。';
+    $('#sum-status').textContent = `完成。${renamed.length ? `已依談話內容把 ${renamed.join('、')}。` : ''}AI 摘要可能有誤，重要內容請對照逐字稿或錄音。`;
   } catch (e) {
     $('#sum-status').textContent = friendlyError(e);
   } finally {
@@ -447,9 +639,29 @@ async function summarize() {
   }
 }
 
+// Replace automatic labels ("發言人 A") with names people said in the meeting.
+function applyNames(list) {
+  const done = [];
+  for (const x of list) {
+    const name = (x.name || '').trim();
+    const label = x.speaker;
+    if (!name || !/^發言人 [A-Z]$/.test(label)) continue;
+    if (!cur.speakers.includes(label) && cur.speakers.includes(name)) {
+      // Already renamed earlier: point this run's owners at the name too.
+      (cur.notes.actionItems || []).forEach((a) => { if (a.owner === label) a.owner = name; });
+      x.speaker = name;
+      continue;
+    }
+    if (!cur.speakers.includes(label) || cur.speakers.includes(name)) continue;
+    renameEverywhere(label, name);
+    done.push(`${label} 改名為 ${name}`);
+  }
+  return done;
+}
+
 async function diarize() {
   if (!cur.segments.length) { toast('還沒有逐字稿'); return; }
-  if (!hasAI()) { toast('這個功能需要 Claude API 金鑰（設定 → AI）。', 5000); return; }
+  if (!hasAI()) { toast('這個功能需要 AI 金鑰（設定 → AI）。', 5000); return; }
   const btn = $('#meet-diarize');
   btn.disabled = true;
   $('#diarize-status').textContent = '分析中…';

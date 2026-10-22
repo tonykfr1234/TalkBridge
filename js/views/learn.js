@@ -194,7 +194,7 @@ function renderGuide() {
     h('ol', {},
       h('li', {}, '先聽：每句按播放兩次、慢速一次，注意聲調和重音。'),
       h('li', {}, '跟讀：按麥克風說一次，分數低於 85 就看紅色標記的字再練。'),
-      h('li', {}, '實戰：到「AI 情境對話」用同一個情境對話 5 回合，看 Claude 給的修正。'),
+      h('li', {}, '實戰：到「AI 情境對話」用同一個情境對話 5 回合，看 AI 給的修正。'),
       h('li', {}, '應用：開會或出差時用「口譯」模式，把聽到的好句子記下來，隔天再練。')),
     h('p', { class: 'small muted' }, '評分比對的是語音辨識聽到的文字與目標句子，聲調或發音不準時，辨識結果會變成別的字，就會被標成紅色。'));
 }
@@ -209,7 +209,7 @@ function startChat() {
   chatTurns = [{ role: 'user', content: `Start the role-play now. I am the learner. Scenario: ${scenarioName()}.` }];
   $('#chat').textContent = '';
   if (!hasAI()) {
-    $('#chat-status').textContent = 'AI 情境對話需要 Claude API 金鑰，請到「設定」填入。沒有金鑰時可先用「情境跟讀」練習。';
+    $('#chat-status').textContent = 'AI 情境對話需要 AI 金鑰（DeepSeek、OpenAI 或 Claude），請到「設定」填入。沒有金鑰時可先用「情境跟讀」練習。';
     return;
   }
   ask();
@@ -217,7 +217,7 @@ function startChat() {
 
 async function ask() {
   chatPending = true;
-  $('#chat-status').textContent = 'Claude 正在回覆…';
+  $('#chat-status').textContent = 'AI 正在回覆…';
   try {
     const r = await aiTutor({ lang, langName: byCode(lang).native, scenario: scenarioName(), turns: chatTurns });
     chatTurns.push({ role: 'assistant', content: r.reply });
@@ -242,8 +242,8 @@ async function ask() {
 }
 
 function sendChat(text) {
-  if (!hasAI()) { toast('請先到「設定」填入 Claude API 金鑰'); return; }
-  if (chatPending) { toast('請等 Claude 回覆後再送出'); return; }
+  if (!hasAI()) { toast('請先到「設定」填入 AI 金鑰'); return; }
+  if (chatPending) { toast('請等 AI 回覆後再送出'); return; }
   const last = chatTurns[chatTurns.length - 1];
   // After a failed request the last turn is still the learner's: add to it so
   // turns keep alternating user/assistant.

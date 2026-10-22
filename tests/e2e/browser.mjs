@@ -87,6 +87,37 @@ await context.route('https://translate.googleapis.com/**', (route) => {
   const detected = q === '聽中文' ? 'en' : (/[\u4e00-\u9fff]/.test(q) ? 'zh-TW' : 'en');
   route.fulfill({ contentType: 'application/json', body: JSON.stringify([[[tr(q, tl), q, null]], null, detected]) });
 });
+const MINUTES = {
+  title: '越南工廠出貨週會', summary: '越南工廠出貨落後兩天，決定先空運補貨。',
+  keyPoints: ['出貨落後兩天', '先空運一批'], decisions: ['先空運一批'],
+  actionItems: [
+    { task: '完成越南工廠補貨', owner: '發言人 B', ownerSource: 'stated', dueDate: '2026-10-30', dueText: '週五前', priority: 'high', quote: '出貨進度落後兩天，需要在週五前完成補貨。' },
+    { task: '確認空運預算', owner: '', ownerSource: 'none', dueDate: '', dueText: '', priority: 'medium', quote: '' },
+  ],
+  openQuestions: ['預算由誰確認'],
+  speakers: [
+    { speaker: '發言人 A', name: '', role: '主持人', mainPoints: ['主持會議'], stance: '主導決策' },
+    { speaker: '發言人 B', name: '阿明', role: '工廠窗口', mainPoints: ['回報出貨延誤'], stance: '說明原因' },
+  ],
+  englishSummary: 'Shipments from the Vietnam plant are two days late; an air shipment was approved.',
+};
+
+// DeepSeek and OpenAI share the Chat Completions format.
+const chatRequests = [];
+for (const host of ['https://api.deepseek.com/**', 'https://api.openai.com/**']) {
+  await context.route(host, async (route) => {
+    const req = route.request();
+    const body = JSON.parse(req.postData() || '{}');
+    chatRequests.push({ url: req.url(), headers: req.headers(), body });
+    const sys = body.messages.find((m) => m.role === 'system')?.content || '';
+    // JSON mode without a schema: leave fields out to exercise the shape repair.
+    const { openQuestions, ...partial } = MINUTES;
+    const content = /actionItems/.test(sys) || body.response_format?.json_schema?.schema?.properties?.actionItems
+      ? JSON.stringify(partial) : 'OK';
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: 'c1', object: 'chat.completion', model: body.model, choices: [{ index: 0, message: { role: 'assistant', content }, finish_reason: 'stop' }] }) });
+  });
+}
+
 await context.route('https://api.anthropic.com/**', async (route) => {
   const req = route.request();
   const body = JSON.parse(req.postData() || '{}');
@@ -94,14 +125,7 @@ await context.route('https://api.anthropic.com/**', async (route) => {
   const schemaKeys = Object.keys(body.output_config?.format?.schema?.properties || {});
   let text = 'OK';
   if (schemaKeys.includes('actionItems')) {
-    text = JSON.stringify({
-      title: '越南工廠出貨週會', summary: '越南工廠出貨落後兩天，決定先空運補貨。',
-      keyPoints: ['出貨落後兩天', '先空運一批'], decisions: ['先空運一批'],
-      actionItems: [{ task: '週五前完成補貨', owner: '發言人 B', due: '週五' }],
-      openQuestions: ['預算由誰確認'],
-      speakers: [{ speaker: '發言人 A', role: '主持人', mainPoints: ['主持會議'], stance: '主導決策' }],
-      englishSummary: 'Shipments from the Vietnam plant are two days late; an air shipment was approved.',
-    });
+    text = JSON.stringify(MINUTES);
   } else if (schemaKeys.includes('labels')) {
     text = JSON.stringify({ labels: [{ i: 0, speaker: '發言人 A' }, { i: 1, speaker: '發言人 B' }, { i: 2, speaker: '發言人 A' }], note: '依問答內容判斷，信心中等。' });
   } else if (schemaKeys.includes('reply')) {
@@ -183,6 +207,8 @@ await page.click('#sub-start');
 await step('meeting: transcript, speakers, recording, save', async () => {
   await page.click('.tab[data-view=meet]');
   await page.selectOption('#meet-tr', 'en');
+  // Manual labelling; automatic separation is covered by tests/e2e/diarize-audio.mjs.
+  await page.uncheck('#meet-auto-spk');
   await page.click('#meet-start');
   await page.waitForSelector('#meet-stop:not([hidden])');
   await page.waitForFunction(() => window.__recLang === 'zh-TW');
@@ -223,8 +249,58 @@ await step('meeting: offline notes and exports', async () => {
   assert.match(decodeURIComponent(href), /待辦/);
 });
 
+await step('meeting: DeepSeek minutes with owners, due dates and speaker names', async () => {
+  await page.click('.tab[data-view=settings]');
+  assert.equal(await page.getAttribute('[data-provider=deepseek]', 'aria-pressed'), 'true');
+  await page.fill('#api-key', 'sk-deepseek-test');
+  await page.press('#api-key', 'Tab');
+  await page.click('#test-key');
+  await page.waitForSelector('#key-status:text("✓ 金鑰可以使用")');
+  await page.click('.tab[data-view=meet]');
+  await page.click('[data-mtab=notes]');
+  await page.click('#meet-summarize');
+  await page.waitForFunction(() => document.querySelector('#sum-status').textContent.startsWith('完成'));
+  const rows = await page.$$eval('#meet-notes table.actions tbody tr', (trs) => trs.map((tr) => [...tr.cells].map((c) => c.textContent.trim())));
+  assert.deepEqual(rows[0].slice(0, 1), ['阿明']);
+  assert.match(rows[0][2], /^10\/30（五）・週五前$/);
+  assert.equal(rows[0][3], '高');
+  assert.equal(rows[1][0], '未指定負責人');
+  assert.equal(rows[1][2], '未指定期限');
+  assert.match(await page.textContent('#sum-status'), /發言人 B 改名為 阿明/);
+  const speakers = await page.$$eval('#meet-transcript .seg select', (s) => s.map((x) => x.value));
+  assert.deepEqual(speakers, ['發言人 A', '阿明', '發言人 A']);
+  const req = chatRequests.find((r) => r.body.response_format);
+  assert.equal(req.url, 'https://api.deepseek.com/chat/completions');
+  assert.equal(req.body.model, 'deepseek-chat');
+  assert.deepEqual(req.body.response_format, { type: 'json_object' });
+  assert.equal(req.headers.authorization, 'Bearer sk-deepseek-test');
+  assert.match(req.body.messages[1].content, /Meeting date: \d{4}-\d{2}-\d{2}（星期/);
+  const md = page.waitForEvent('download');
+  await page.click('[data-mtab=export]');
+  await page.click('[data-export=md]');
+  const minutes = await readFile(await (await md).path(), 'utf8');
+  assert.match(minutes, /\| 阿明 \| 完成越南工廠補貨 \| 10\/30（五）・週五前 \| 高 \|/);
+  assert.match(minutes, /\*\*未指定負責人\*\*/);
+});
+
+await step('settings: OpenAI uses strict JSON schema output', async () => {
+  await page.click('.tab[data-view=settings]');
+  await page.click('[data-provider=openai]');
+  await page.fill('#api-key', 'sk-openai-test');
+  await page.press('#api-key', 'Tab');
+  await page.click('.tab[data-view=meet]');
+  await page.click('[data-mtab=notes]');
+  await page.click('#meet-summarize');
+  await page.waitForFunction(() => document.querySelector('#sum-status').textContent.startsWith('完成'));
+  const req = chatRequests.filter((r) => r.url.startsWith('https://api.openai.com')).pop();
+  assert.equal(req.body.response_format.type, 'json_schema');
+  assert.equal(req.body.response_format.json_schema.strict, true);
+  assert.equal(req.headers.authorization, 'Bearer sk-openai-test');
+});
+
 await step('meeting: Claude minutes and speaker suggestions via the SDK', async () => {
   await page.click('.tab[data-view=settings]');
+  await page.click('[data-provider=claude]');
   await page.fill('#api-key', 'sk-ant-test-key');
   await page.press('#api-key', 'Tab');
   await page.click('#test-key');
@@ -234,6 +310,7 @@ await step('meeting: Claude minutes and speaker suggestions via the SDK', async 
   await page.click('#meet-summarize');
   await page.waitForSelector('#meet-notes:has-text("越南工廠出貨落後兩天")');
   assert.match(await page.textContent('#meet-notes'), /Shipments from the Vietnam plant/);
+  assert.equal(await page.textContent('#meet-notes table.actions tbody tr td'), '阿明', 'owners follow names given earlier');
   assert.equal(await page.inputValue('#meet-title'), '越南工廠出貨週會');
   await page.click('[data-mtab=speakers]');
   await page.click('#meet-diarize');
@@ -249,6 +326,8 @@ await step('meeting: Claude minutes and speaker suggestions via the SDK', async 
 if (SHOTS) {
   await page.click('[data-mtab=notes]');
   await shot({ path: join(ROOT, 'docs/media/meeting.png') });
+  await page.evaluate(() => { document.querySelector('#toast').hidden = true; });
+  await (await page.$('#meet-notes')).screenshot({ path: join(ROOT, 'docs/media/action-items.png') });
 }
 
 await step('practice: pronunciation scoring and progress', async () => {

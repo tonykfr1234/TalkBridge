@@ -4,13 +4,13 @@
 
 This repository must never contain real credentials or private data, including:
 
-- Anthropic API keys (`sk-ant-…`) or any other API keys;
+- DeepSeek, OpenAI or Anthropic API keys (`sk-…`, `sk-ant-…`) or any other API keys;
 - GitHub personal access tokens;
 - cookies, browser/session exports, authentication headers;
 - `.env` files or credential JSON files;
 - meeting recordings, transcripts or exported minutes.
 
-The app stores an Anthropic API key only in the viewer's own browser (`localStorage`) and sends it only to `api.anthropic.com`. It is never part of the repository or of the deployed site.
+The app stores each AI key only in the viewer's own browser (`localStorage`) and sends it only to that provider (`api.deepseek.com`, `api.openai.com` or `api.anthropic.com`). No key is ever part of the repository or of the deployed site: the site is public, so any key in its code could be copied and used by anyone.
 
 `scripts/security_scan.py` runs in CI on every push and pull request and fails if it finds key-shaped strings or private file types.
 
@@ -19,9 +19,10 @@ The app stores an Anthropic API key only in the viewer's own browser (`localStor
 | Data | Where it goes |
 | --- | --- |
 | Microphone audio for recognition | The browser's speech service (Chrome: Google; Safari: Apple) |
-| Recognized text | The translation service (Google Translate endpoint, MyMemory) or Claude when chosen |
+| Recognized text | The translation service (Google Translate endpoint, MyMemory) or the chosen AI provider |
+| Voice fingerprints for speaker separation | Computed and kept on the device (stored with the meeting) |
 | Meeting audio, transcripts, notes | IndexedDB on the device; leaves only when the user exports or shares |
-| Transcript sent for AI minutes | Anthropic API, with the user's own key |
+| Transcript sent for AI minutes | The chosen AI provider (DeepSeek, OpenAI or Anthropic), with the user's own key |
 
 ## Reporting a vulnerability
 

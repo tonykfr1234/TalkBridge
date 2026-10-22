@@ -1,30 +1,54 @@
-// 設定: Claude key and model, translation engine, voice, theme, device support.
+// 設定: AI provider, key and model; translation engine, voice, theme, device support.
 import { settings } from '../store.js';
-import { MODELS, ask, hasAI, friendlyError } from '../ai.js';
+import { PROVIDERS, MODELS, currentProvider, ask, hasAI, friendlyError } from '../ai.js';
 import { canRecognize, canSpeak, pickMime, speak } from '../speech.js';
 import { $, $$, h, toast } from '../ui.js';
 
 let installPrompt = null;
 
+function showProvider() {
+  const id = currentProvider();
+  const p = PROVIDERS[id];
+  $$('[data-provider]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.provider === id)));
+  $('#key-label').textContent = `${p.name} API 金鑰`;
+  $('#api-key').placeholder = p.keyHint;
+  $('#api-key').value = settings.get(p.keySetting) || '';
+  $('#model').value = settings.get(p.modelSetting) || p.defaultModel;
+  const list = $('#model-list');
+  list.textContent = '';
+  for (const m of p.models) {
+    const label = id === 'claude' ? (MODELS.find((x) => x.id === m) || {}).label : '';
+    list.append(h('option', { value: m }, label || m));
+  }
+  $('#key-note').textContent = `在 ${p.console} 建立金鑰，用量會計入你的 ${p.name} 帳戶。模型可從清單選，或輸入其他模型名稱。`;
+  $('#key-status').textContent = '';
+  updateEngineNote();
+}
+
 export function initSettings() {
+  $$('[data-provider]').forEach((b) => b.addEventListener('click', () => {
+    settings.set('provider', b.dataset.provider);
+    showProvider();
+  }));
   const key = $('#api-key');
-  key.value = settings.get('apiKey');
-  key.addEventListener('change', () => { settings.set('apiKey', key.value.trim()); updateEngineNote(); });
+  key.addEventListener('change', () => { settings.set(PROVIDERS[currentProvider()].keySetting, key.value.trim()); updateEngineNote(); });
   const model = $('#model');
-  for (const m of MODELS) model.append(h('option', { value: m.id }, m.label));
-  model.value = settings.get('model');
-  model.addEventListener('change', () => settings.set('model', model.value));
+  model.addEventListener('change', () => {
+    const p = PROVIDERS[currentProvider()];
+    settings.set(p.modelSetting, model.value.trim() || p.defaultModel);
+  });
   $('#clear-key').addEventListener('click', () => {
     key.value = '';
-    settings.set('apiKey', '');
-    if (settings.get('engine') === 'ai') setEngine('web');
+    settings.set(PROVIDERS[currentProvider()].keySetting, '');
+    if (settings.get('engine') === 'ai' && !hasAI()) setEngine('web');
     $('#key-status').textContent = '已清除';
     updateEngineNote();
   });
   $('#test-key').addEventListener('click', async () => {
-    settings.set('apiKey', key.value.trim());
+    settings.set(PROVIDERS[currentProvider()].keySetting, key.value.trim());
     if (!hasAI()) { $('#key-status').textContent = '請先貼上金鑰'; return; }
     $('#key-status').textContent = '測試中…';
+    $('#key-status').style.color = '';
     try {
       const r = await ask({ messages: [{ role: 'user', content: 'Reply with exactly: OK' }], maxTokens: 2000 });
       $('#key-status').textContent = r ? '✓ 金鑰可以使用' : '已連線';
@@ -34,6 +58,7 @@ export function initSettings() {
       $('#key-status').style.color = 'var(--rec)';
     }
   });
+  showProvider();
 
   $$('input[name="engine"]').forEach((r) => {
     r.checked = r.value === settings.get('engine');
@@ -69,7 +94,7 @@ export function initSettings() {
 
 function setEngine(v) {
   if (v === 'ai' && !hasAI()) {
-    toast('AI 翻譯需要先填入 Claude API 金鑰');
+    toast('AI 翻譯需要先填入 AI 金鑰');
     v = 'web';
   }
   settings.set('engine', v);
@@ -79,7 +104,7 @@ function setEngine(v) {
 
 function updateEngineNote() {
   const ai = settings.get('engine') === 'ai' && hasAI();
-  $('#engine-note').textContent = ai ? '翻譯引擎：Claude AI' : '翻譯引擎：免費網路翻譯';
+  $('#engine-note').textContent = ai ? `翻譯引擎：${PROVIDERS[currentProvider()].name} AI` : '翻譯引擎：免費網路翻譯';
 }
 
 function applyTheme(t) {

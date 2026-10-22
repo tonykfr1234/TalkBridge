@@ -65,7 +65,7 @@ export async function translate(text, from, to, { signal, engine } = {}) {
       } catch (e2) {
         if (signal && signal.aborted) throw e2;
         if (hasAI()) out = { text: await aiTranslate(clean, f, t, { signal }), detected: null };
-        else throw new Error('翻譯服務連不上，請檢查網路，或在「設定」填入 Claude API 金鑰改用 AI 翻譯。');
+        else throw new Error('翻譯服務連不上，請檢查網路，或在「設定」填入 AI 金鑰改用 AI 翻譯。');
       }
     }
   }

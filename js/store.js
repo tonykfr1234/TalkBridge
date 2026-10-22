@@ -8,7 +8,12 @@ const DEFAULTS = {
   speakOut: true,            // read translations aloud in conversation mode
   ttsRate: 1,
   engine: 'web',             // web | ai
-  apiKey: '',
+  provider: '',              // deepseek | openai | claude ('' = pick from saved keys)
+  deepseekKey: '',
+  deepseekModel: 'deepseek-chat',
+  openaiKey: '',
+  openaiModel: 'gpt-4.1-mini',
+  apiKey: '',                // Claude
   model: 'claude-opus-5-5',
   subSource: 'en',
   subTarget: 'zh-TW',

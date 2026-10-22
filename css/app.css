@@ -281,3 +281,13 @@ audio { width: 100%; }
 .tipbox kbd { font-family: var(--mono); font-size: .9em; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
 .tipbox summary { cursor: pointer; font-weight: 700; margin-top: 4px; }
 .tipbox li { margin-bottom: 3px; }
+
+/* Action items */
+.missing { color: var(--rec); font-weight: 700; }
+.warn-note { color: var(--warn); }
+table.actions td.due { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.prio { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); }
+.prio.high { color: var(--rec); } .prio.medium { color: var(--warn); } .prio.low { color: var(--muted); }
+.owners { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.owner-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.owner-card ul { margin: 6px 0 0; padding-left: 18px; }

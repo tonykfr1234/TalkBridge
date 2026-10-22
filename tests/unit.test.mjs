@@ -57,7 +57,7 @@ test('TXT and Markdown exports include speakers and translations', () => {
   assert.match(txt, /Let's start/);
   const md = toMarkdown({ ...meeting, notes: { summary: '出貨延誤', keyPoints: ['空運'], decisions: [], actionItems: [{ task: '補貨', owner: 'B', due: '週五' }], openQuestions: [], englishSummary: 'Shipping delay' } });
   assert.match(md, /## 待辦事項/);
-  assert.match(md, /\| 補貨 \| B \| 週五 \|/);
+  assert.match(md, /\| B \| 補貨 \| 週五（日期待確認） \| 中 \|/);
   assert.match(md, /## English summary/);
 });
 

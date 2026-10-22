@@ -158,8 +158,8 @@
       <div class="view-head">
         <div>
           <div class="eyebrow">會議記錄</div>
-          <h1>錄音、逐字稿、中翻英、重點備忘一次完成</h1>
-          <p class="lede">開會時按下開始，逐字稿會即時出現。點選發言人標記是誰在說話（數字鍵 1–9 快速切換），會後一鍵整理重點、分析發言、匯出或分享到 LINE。</p>
+          <h1>自動分辨發言人，待辦寫清楚誰做、哪天到期</h1>
+          <p class="lede">開會時按下開始，逐字稿即時出現，並依聲音自動分辨發言人。會後一鍵整理重點，待辦事項列出負責人與到期日，可匯出或分享到 LINE。</p>
         </div>
       </div>
       <div class="meet-grid">
@@ -169,6 +169,7 @@
               <label class="field">會議語言<select id="meet-lang"></select></label>
               <label class="field">同步翻譯成<select id="meet-tr"></select></label>
               <label class="check small" style="align-self:flex-end"><input type="checkbox" id="meet-record"> 同時錄音</label>
+              <label class="check small" style="align-self:flex-end"><input type="checkbox" id="meet-auto-spk"> 自動分辨發言人</label>
             </div>
             <div class="recbar">
               <button class="btn primary" id="meet-start"><svg><use href="#i-mic"/></svg>開始記錄</button>
@@ -180,7 +181,7 @@
             </div>
             <div>
               <div class="row" style="justify-content:space-between">
-                <span class="small muted">目前發言人（點選切換）</span>
+                <span class="small muted" id="meet-spk-hint">目前發言人（點選切換）</span>
                 <button class="btn ghost small" id="meet-add-speaker">＋ 新增發言人</button>
               </div>
               <div class="speakers" id="meet-speakers"></div>
@@ -214,11 +215,15 @@
             <div data-mpanel="speakers" hidden>
               <div class="bars" id="meet-bars"></div>
               <div class="row" style="margin-top:14px">
+                <button class="btn" id="meet-recluster"><svg><use href="#i-meet"/></svg>依聲音重新分析發言人</button>
+                <span class="small muted" id="recluster-status"></span>
+              </div>
+              <div class="row" style="margin-top:8px">
                 <button class="btn" id="meet-diarize"><svg><use href="#i-spark"/></svg>AI 依內容建議發言人</button>
                 <span class="small muted" id="diarize-status"></span>
               </div>
               <div id="meet-speaker-notes" style="margin-top:12px"></div>
-              <p class="small muted">單一麥克風無法從聲紋分辨人；這裡以你的手動標記為準，AI 只根據談話內容提出建議。</p>
+              <p class="small muted">開會時 App 會比對每句話的音色與音高，自動分給不同發言人；會議結束時會用整場資料再分析一次。聲音很像的兩個人可能被併成同一位，請在逐字稿改正，手動改過的句子不會被重新分析覆蓋。整理重點時，AI 會從自我介紹或稱呼找出真名，自動替換「發言人 A」。</p>
             </div>
             <div data-mpanel="export" hidden class="stack">
               <audio id="meet-audio" controls hidden></audio>
@@ -302,17 +307,22 @@
       <div class="view-head"><div><div class="eyebrow">設定</div><h1>翻譯引擎、AI 與語音</h1></div></div>
       <div class="settings-grid">
         <div class="card stack">
-          <h2>Claude AI（選用）</h2>
-          <p class="small muted">填入 Anthropic API 金鑰後，可使用 AI 會議重點、發言分析、AI 情境對話，以及更準確的 AI 翻譯。金鑰只存在這台裝置的瀏覽器，只會傳給 api.anthropic.com。</p>
-          <label class="field">API 金鑰<input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off"></label>
-          <label class="field">模型<select id="model"></select></label>
+          <h2>AI 服務（選用）</h2>
+          <p class="small muted">填入金鑰後可使用 AI 會議重點與待辦、發言人姓名辨識、AI 情境對話與 AI 翻譯。金鑰只存在這台裝置的瀏覽器，只會傳給你選的那一家服務。</p>
+          <div class="mode-switch" role="group" aria-label="AI 服務">
+            <button data-provider="deepseek" aria-pressed="true">DeepSeek</button>
+            <button data-provider="openai" aria-pressed="false">OpenAI</button>
+            <button data-provider="claude" aria-pressed="false">Claude</button>
+          </div>
+          <label class="field"><span id="key-label">API 金鑰</span><input type="password" id="api-key" placeholder="sk-…" autocomplete="off"></label>
+          <label class="field">模型<input type="text" id="model" list="model-list" autocomplete="off" spellcheck="false"><datalist id="model-list"></datalist></label>
           <div class="row"><button class="btn" id="test-key">測試金鑰</button><button class="btn ghost" id="clear-key">清除金鑰</button><span class="small" id="key-status"></span></div>
-          <p class="keynote">在 console.anthropic.com 建立金鑰。用量會計入你的 Anthropic 帳戶。</p>
+          <p class="keynote" id="key-note"></p>
         </div>
         <div class="card stack">
           <h2>翻譯引擎</h2>
           <label class="check"><input type="radio" name="engine" value="web"> 免費網路翻譯（速度快，預設）</label>
-          <label class="check"><input type="radio" name="engine" value="ai"> Claude AI 翻譯（語氣自然，需要金鑰，較慢）</label>
+          <label class="check"><input type="radio" name="engine" value="ai"> AI 翻譯（用上方選的 AI 服務，語氣自然，較慢）</label>
           <h2 style="margin-top:8px">語音</h2>
           <label class="field">唸出速度 <input type="range" id="tts-rate" min="0.5" max="1.4" step="0.1"></label>
           <button class="btn" id="tts-test"><svg><use href="#i-play"/></svg>試聽</button>

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-22 · 1.1.0
+
+- Automatic speaker separation: each recognized phrase gets a voice fingerprint (MFCC timbre averages and median pitch) from the microphone audio, grouped online during the meeting and re-grouped for the whole meeting when it ends. Tapping a speaker corrects the newest line and teaches the grouping; hand-corrected lines are never overwritten. Manual labelling stays available. Tested with a real-audio browser test of three synthetic voices.
+- 自動分辨發言人：每句話依音色與音高自動分組，開會中即時判斷，結束時用整場資料重新分析；點發言人可更正最新一句，手動改過的句子不會被覆蓋。仍可切回手動標記。
+
+- Action items now carry owner (stated / inferred / none), a calendar due date resolved from the meeting date ("下週五" → 10/30（五）) with the original words, priority and the source line. Missing owners or dates are flagged; tasks are also grouped by owner in the app, Markdown and LINE text. Real names said in the meeting replace the automatic speaker labels.
+- 待辦事項列出負責人、換算成實際日期的期限（保留原話）、優先順序與出處；缺負責人或期限以紅字提示，並依負責人整理。會議中說出的真名會自動取代「發言人 A」。
+
+- Offline notes parse deadlines (今天/明天/下週X/月底/X月X日/X號/by Friday…) and named owners ("請小王…", "Amy 負責…").
+- 離線整理也能抓出日期與負責人。
+
+- AI providers: DeepSeek (default) and OpenAI join Claude, each with its own key and model in Settings. DeepSeek uses JSON mode with the schema in the prompt and repairs the shape; OpenAI uses a strict JSON schema.
+- AI 服務新增 DeepSeek（預設）與 OpenAI，可在設定切換，金鑰分開保存。
+
 ## 2026-10-22 · 1.0.1
 
 - Rewrite the system-audio instructions for Windows 11: open the Sound dialog with `mmsys.cpl` (or Settings → System → Sound → More sound settings), show disabled devices, enable Stereo Mix and pick it in Chrome's microphone settings; step-by-step VB-Audio Virtual Cable setup, including "Listen to this device", for PCs without Stereo Mix.

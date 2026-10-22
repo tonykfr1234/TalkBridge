@@ -18,7 +18,7 @@ Apri in Chrome o Edge: https://tonykfr1234.github.io/TalkBridge/
 
 ---
 
-TalkBridge trasforma telefono o portatile in un interprete tascabile: parli cinese e lo dice in inglese; l'altra persona risponde in inglese e lo dice in cinese. Vicino a un altoparlante del computer sottotitola dal vivo video e riunioni online. Nelle riunioni registra l'audio, trascrive in diretta con etichette dei relatori e traduzione parallela, poi produce verbale, attività e un riepilogo in inglese da esportare o inviare via LINE. La modalità pratica allena frasi di lavoro e viaggio in inglese, vietnamita e thailandese con punteggio di pronuncia e un partner di gioco di ruolo con IA. Tutto funziona nel browser e i dati restano sul dispositivo; le funzioni Claude sono facoltative e usano la tua chiave API Anthropic.
+TalkBridge trasforma telefono o portatile in un interprete tascabile: parli cinese e lo dice in inglese; l'altra persona risponde in inglese e lo dice in cinese. Vicino a un altoparlante del computer sottotitola dal vivo video e riunioni online. Nelle riunioni registra l'audio, trascrive in diretta con etichette dei relatori e traduzione parallela, poi produce verbale, attività e un riepilogo in inglese da esportare o inviare via LINE. La modalità pratica allena frasi di lavoro e viaggio in inglese, vietnamita e thailandese con punteggio di pronuncia e un partner di gioco di ruolo con IA. Tutto funziona nel browser e i dati restano sul dispositivo; le funzioni IA sono facoltative e usano la tua chiave DeepSeek (predefinito), OpenAI o Claude. I relatori vengono separati automaticamente dalla voce e ogni attività ha responsabile e scadenza.
 
 Le 12 lingue del README traducono la documentazione. L'interfaccia dell'app è attualmente in cinese tradizionale.
 
