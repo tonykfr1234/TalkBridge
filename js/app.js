@@ -4,6 +4,7 @@ import { initSubs, leaveSubs } from './views/subs.js';
 import { initMeet, meetingBusy } from './views/meet.js';
 import { initLearn, leaveLearn } from './views/learn.js';
 import { initSettings } from './views/settings.js';
+import { initVoice } from './views/voice.js';
 import { canRecognize } from './speech.js';
 import { $, $$, toast } from './ui.js';
 
@@ -27,6 +28,7 @@ function show(name) {
 
 function boot() {
   initSettings();
+  initVoice();
   initTalk();
   initSubs();
   initMeet();

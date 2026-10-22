@@ -4,7 +4,7 @@
 
 This repository must never contain real credentials or private data, including:
 
-- DeepSeek, OpenAI or Anthropic API keys (`sk-…`, `sk-ant-…`) or any other API keys;
+- DeepSeek, OpenAI, Anthropic or ElevenLabs API keys (`sk-…`, `sk-ant-…`) or any other API keys;
 - GitHub personal access tokens;
 - cookies, browser/session exports, authentication headers;
 - `.env` files or credential JSON files;
@@ -22,6 +22,8 @@ The app stores each AI key only in the viewer's own browser (`localStorage`) and
 | Recognized text | The translation service (Google Translate endpoint, MyMemory) or the chosen AI provider |
 | Voice fingerprints for speaker separation | Computed and kept on the device (stored with the meeting) |
 | Meeting audio, transcripts, notes | IndexedDB on the device; leaves only when the user exports or shares |
+| Voice sample for "my voice" | ElevenLabs, with the user's own key, only after the user confirms it is their own voice; deletable from the app |
+| Text read aloud | OpenAI text-to-speech or ElevenLabs when chosen, otherwise the device's own voices |
 | Transcript sent for AI minutes | The chosen AI provider (DeepSeek, OpenAI or Anthropic), with the user's own key |
 
 ## Reporting a vulnerability

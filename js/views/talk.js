@@ -191,7 +191,7 @@ async function handlePhrase(text, heardSide, { typed = false, language = '' } = 
     fillBubble(bubble, side, res.text, to);
     log.push({ side, src: text, dst: res.text });
     if (active) $('#talk-interim').textContent = listeningText();
-    if (settings.get('speakOut') && !typed) await speakPaused(res.text, to);
+    if (settings.get('speakOut') && !typed) await speakPaused(res.text, to, side);
   } catch (e) {
     bubble.querySelector('.dst').textContent = e.message || '翻譯失敗';
     bubble.classList.remove('pending');
@@ -200,13 +200,13 @@ async function handlePhrase(text, heardSide, { typed = false, language = '' } = 
 
 // Pause listening while reading the translation aloud so the app does not
 // translate its own voice.
-async function speakPaused(text, lang) {
+async function speakPaused(text, lang, side) {
   if (speaking) return;
   speaking = true;
   const wasActive = active;
   if (rec) rec.stop();
   if (whisper) whisper.pause();
-  await speak(text, byCode(lang).locale);
+  await speak(text, byCode(lang).locale, { who: side, onError: (e) => toast(`線上語音失敗，改用內建語音：${friendlyError(e)}`, 5000) });
   speaking = false;
   if (wasActive && active === wasActive && rec) {
     rec.setLang(byCode(langOf(listeningSide)).locale);
@@ -236,7 +236,7 @@ function fillBubble(b, side, dst, to) {
   const l = byCode(to);
   meta.append(
     h('span', {}, `${side === 'me' ? '我' : '對方'} → ${l.name}`),
-    h('button', { title: '唸出來', 'aria-label': '唸出來', onclick: () => speak(dst, l.locale) }, icon('i-play')),
+    h('button', { title: '唸出來', 'aria-label': '唸出來', onclick: () => speak(dst, l.locale, { who: side }) }, icon('i-play')),
     h('button', { title: '複製', 'aria-label': '複製', onclick: () => copyText(dst) }, icon('i-copy')),
   );
   meta.querySelectorAll('svg').forEach((s) => { s.style.width = '15px'; s.style.height = '15px'; });

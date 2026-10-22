@@ -7,6 +7,10 @@ const DEFAULTS = {
   convMode: 'auto',          // auto | manual
   speakOut: true,            // read translations aloud in conversation mode
   ttsRate: 1,
+  voiceMe: 'female',         // female | male | clone: reads translations of my words
+  voiceThem: 'male',         // female | male: reads everything else
+  elevenKey: '',
+  cloneVoiceId: '',
   engine: 'web',             // web | ai
   provider: '',              // deepseek | openai | claude ('' = pick from saved keys)
   deepseekKey: '',

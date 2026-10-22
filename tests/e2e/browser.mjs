@@ -108,6 +108,8 @@ for (const host of ['https://api.deepseek.com/**', 'https://api.openai.com/**'])
   await context.route(host, async (route) => {
     const req = route.request();
     const body = JSON.parse(req.postData() || '{}');
+    // Speech requests (read-aloud with an OpenAI key) fail here; the app falls back to device voices.
+    if (!body.messages) return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":{"message":"unavailable in test"}}' });
     chatRequests.push({ url: req.url(), headers: req.headers(), body });
     const sys = body.messages.find((m) => m.role === 'system')?.content || '';
     // JSON mode without a schema: leave fields out to exercise the shape repair.
@@ -140,7 +142,7 @@ await context.route('https://api.anthropic.com/**', async (route) => {
 const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
-page.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g|net::ERR_FAILED/.test(m.text())) errors.push(m.text()); });
+page.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g|net::ERR_FAILED|status of 503/.test(m.text())) errors.push(m.text()); });
 
 async function step(name, fn) {
   try { await fn(); console.log('ok   ', name); } catch (e) { console.log('FAIL ', name); throw e; }

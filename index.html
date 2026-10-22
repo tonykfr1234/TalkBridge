@@ -71,6 +71,14 @@
           </div>
           <div class="row small">
             <label class="check"><input type="checkbox" id="speak-out"> 自動唸出翻譯</label>
+            <span class="voice-pick"><span class="muted">我的話用</span>
+              <span class="mode-switch small" role="group" aria-label="我的話用哪種聲音唸">
+                <button data-voice-me="female" aria-pressed="true">女聲</button><button data-voice-me="male" aria-pressed="false">男聲</button><button data-voice-me="clone" aria-pressed="false">我的聲音</button>
+              </span></span>
+            <span class="voice-pick"><span class="muted">對方的話用</span>
+              <span class="mode-switch small" role="group" aria-label="對方的話用哪種聲音唸">
+                <button data-voice-them="female" aria-pressed="false">女聲</button><button data-voice-them="male" aria-pressed="true">男聲</button>
+              </span></span>
             <span class="muted" id="engine-note"></span>
           </div>
         </div>
@@ -321,11 +329,33 @@
           <div class="row"><button class="btn" id="test-key">測試金鑰</button><button class="btn ghost" id="clear-key">清除金鑰</button><span class="small" id="key-status"></span></div>
           <p class="keynote" id="key-note"></p>
         </div>
+        <div class="card stack" id="clone-card">
+          <h2>我的聲音（聲音克隆）</h2>
+          <p class="small muted">錄一段你自己的聲音，之後口譯時「我的話」翻譯完會用你的聲音唸出來，例如你說中文，對方聽到「你的聲音」說英文。使用 ElevenLabs 的即時聲音克隆，需要你自己的 ElevenLabs API 金鑰（聲音克隆需付費方案）。錄音只會傳給 ElevenLabs。</p>
+          <label class="field">ElevenLabs API 金鑰<input type="password" id="eleven-key" placeholder="sk_…" autocomplete="off"></label>
+          <div id="clone-ready" hidden class="stack">
+            <p class="ok-note">✓ 已建立你的聲音。口譯頁「我的話用」選「我的聲音」即可使用。</p>
+            <div class="row"><button class="btn" id="clone-test"><svg><use href="#i-play"/></svg>試聽我的聲音</button><button class="btn ghost" id="clone-delete"><svg><use href="#i-trash"/></svg>刪除我的聲音</button></div>
+          </div>
+          <div id="clone-setup" class="stack">
+            <p class="small"><b>請用平常說話的方式，清楚唸出下面這段（約 1 分鐘，可以唸兩遍）：</b></p>
+            <blockquote class="clone-script" id="clone-script">大家好，我是今天的與會者。這段錄音是為了建立我自己的聲音，之後翻譯時會用我的聲音唸出來。我們今天要討論出貨進度、報價和交期，請大家把問題記下來，會後我會整理重點寄給各位。Hello everyone, thank you for joining today. We will review the shipment schedule, confirm the price list, and agree on the next steps. If anything is unclear, please let me know and I will follow up by Friday.</blockquote>
+            <div class="row">
+              <button class="btn primary" id="clone-rec"><svg><use href="#i-mic"/></svg>開始錄音</button>
+              <span class="timer small-timer" id="clone-timer">00:00</span>
+              <span class="small muted" id="clone-rec-note">建議錄 60 秒以上，安靜的地方效果最好。</span>
+            </div>
+            <audio id="clone-preview" controls hidden></audio>
+            <label class="check small"><input type="checkbox" id="clone-consent"> 這是我本人的聲音，我同意用它建立聲音克隆。</label>
+            <div class="row"><button class="btn primary" id="clone-create" disabled><svg><use href="#i-spark"/></svg>建立我的聲音</button><span class="small" id="clone-status"></span></div>
+          </div>
+        </div>
         <div class="card stack">
           <h2>翻譯引擎</h2>
           <label class="check"><input type="radio" name="engine" value="web"> 免費網路翻譯（速度快，預設）</label>
           <label class="check"><input type="radio" name="engine" value="ai"> AI 翻譯（用上方選的 AI 服務，語氣自然，較慢）</label>
           <h2 style="margin-top:8px">語音</h2>
+          <p class="small muted" id="voice-engine-note"></p>
           <label class="field">唸出速度 <input type="range" id="tts-rate" min="0.5" max="1.4" step="0.1"></label>
           <button class="btn" id="tts-test"><svg><use href="#i-play"/></svg>試聽</button>
           <h2 style="margin-top:8px">外觀</h2>

@@ -301,3 +301,10 @@ table.actions td.due { white-space: nowrap; font-variant-numeric: tabular-nums; 
 .rename-row .dot { width: 10px; height: 10px; border-radius: 50%; }
 .rename-row input { width: 100%; }
 @media (max-width: 720px) { .rename-row { grid-template-columns: 12px minmax(0, 1fr); } .rename-row .muted { grid-column: 2; } }
+
+/* Voice choice */
+.voice-pick { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.mode-switch.small button { padding: 4px 10px; font-size: 13px; }
+.clone-script { margin: 0; padding: 10px 12px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 10px 10px 0; font-size: 14px; line-height: 1.7; }
+.small-timer { font-size: 18px; }
+.ok-note { color: var(--ok); font-weight: 700; margin: 0; }

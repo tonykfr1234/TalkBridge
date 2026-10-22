@@ -62,7 +62,7 @@ export function friendlyError(e) {
   const status = e && e.status;
   const name = (e && e.provider) || providerInfo().name;
   if (status === 401) return `${name} API 金鑰無效，請到「設定」重新貼上。`;
-  if (status === 402) return `${name} 帳戶餘額不足，請到 ${providerInfo().console} 儲值。`;
+  if (status === 402) return `${name} 帳戶餘額不足或方案不支援這個功能，請到 ${name} 網站確認。`;
   if (status === 403) return `這把 ${name} API 金鑰沒有使用此模型的權限。`;
   if (status === 404) return `${name} 找不到這個模型，請到「設定」換一個模型名稱。`;
   if (status === 429) return '請求太頻繁或額度不足，請稍後再試。';

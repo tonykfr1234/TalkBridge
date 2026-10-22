@@ -1,5 +1,6 @@
 // Speech recognition (Web Speech API), text-to-speech and audio recording.
 import { settings } from './store.js';
+import { speakIn, pickVoice, stopAudio } from './tts.js';
 
 const SR = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 export const canRecognize = !!SR;
@@ -121,22 +122,37 @@ export function voiceFor(locale) {
 
 export function hasVoice(locale) { return !!voiceFor(locale); }
 
-export function speak(text, locale, { rate } = {}) {
+function deviceSpeak(text, locale, gender, rate) {
   return new Promise((resolve) => {
     if (!canSpeak || !text) { resolve(false); return; }
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = locale;
-    const v = voiceFor(locale);
+    if (!voices.length) loadVoices();
+    const v = pickVoice(voices, locale, gender) || voiceFor(locale);
     if (v) u.voice = v;
-    u.rate = rate || settings.get('ttsRate') || 1;
+    u.rate = rate;
     u.onend = () => resolve(true);
     u.onerror = () => resolve(false);
     speechSynthesis.speak(u);
   });
 }
 
-export function stopSpeaking() { if (canSpeak) speechSynthesis.cancel(); }
+/**
+ * Read text aloud. `who` picks the voice setting: 'me' (my words, may be my
+ * cloned voice) or 'them' (everything else).
+ */
+export function speak(text, locale, { rate, who = 'them', onError } = {}) {
+  if (!text) return Promise.resolve(false);
+  const r = rate || settings.get('ttsRate') || 1;
+  const voice = who === 'me' ? settings.get('voiceMe') : settings.get('voiceThem');
+  return speakIn(text, locale, voice, { rate: r, onError, device: (t, l, g) => deviceSpeak(t, l, g, r) });
+}
+
+export function stopSpeaking() {
+  stopAudio();
+  if (canSpeak) speechSynthesis.cancel();
+}
 
 // ---- Audio recording ----
 export function pickMime() {

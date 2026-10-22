@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-22 · 1.3.0
+
+- Voice choice for read-aloud translations: female, male or my own voice for my words, female or male for the other person's. OpenAI text-to-speech when an OpenAI key is saved, otherwise device voices picked by gender (from voice names). Online voices fall back to device voices on failure, and repeated lines are replayed from a cache.
+- 朗讀聲音可選：我的話用女聲、男聲或我的聲音，對方的話用女聲或男聲。有 OpenAI 金鑰用線上語音，否則依性別挑裝置語音。
+
+- "My voice": instant voice cloning with ElevenLabs. Record about a minute of the on-screen script, confirm it is your own voice, create, use, and delete it from Settings. Recordings are converted to WAV and sent only to ElevenLabs.
+- 「我的聲音」：用 ElevenLabs 即時克隆自己的聲音；錄約 1 分鐘、勾選同意後建立，可隨時刪除。
+
 ## 2026-10-22 · 1.2.0
 
 - Interpreter auto mode no longer assumes people take turns. With an OpenAI key, utterances are cut from the microphone by voice activity and transcribed by Whisper, which detects the language of each one, so either language works in any order. Without a key, the free browser recognizer stays on Chinese (which also writes English sentences in English) and the text decides the language, instead of switching to English after every Chinese line and mishearing the next Chinese line.
