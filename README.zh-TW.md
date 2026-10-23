@@ -10,6 +10,7 @@
   <a href="https://github.com/tonykfr1234/TalkBridge/releases/latest"><img src="https://img.shields.io/github/v/release/tonykfr1234/TalkBridge?label=Android%20APK&color=0b7480" alt="Android APK"></a>
   <img src="https://img.shields.io/badge/platform-Web%20%7C%20Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS-0b7480" alt="平台">
   <img src="https://img.shields.io/badge/languages-22-7a4b9a" alt="22 種語言">
+  <a href="https://tonykfr1234.github.io/TalkBridge/donate.html"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftonykfr1234%2FTalkBridge%2Fmain%2Fdonors.json&query=%24.count&label=%E2%98%95%20supporters&color=c4632b" alt="Supporters"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT 授權"></a>
 </p>
 <p align="center">
@@ -132,6 +133,8 @@ App 和網頁是同一套程式，包在原生外殼裡：改用 Android 系統�
 
 - [使用說明](docs/USER_GUIDE.zh-TW.md)
 - [Android App](docs/ANDROID.zh-TW.md)
+- [App 共用規範：關於、更新說明、贊助](docs/APP_STANDARD.zh-TW.md)
+- [贊助設定與確認](docs/DONATIONS.zh-TW.md)
 - [架構說明（英文）](docs/ARCHITECTURE.md)
 - [更新紀錄](CHANGELOG.md) · [參與貢獻](CONTRIBUTING.md) · [安全政策](SECURITY.md)
 
@@ -153,6 +156,11 @@ scripts/build_vendor.sh # 重新打包 Anthropic SDK
 ## 安全
 
 請勿提交任何 API 金鑰，詳見 [SECURITY.md](SECURITY.md)。
+
+<a id="support"></a>
+## 支持
+
+**Build by Tony · 2026 年製作。** TalkBridge 免費使用。如果對你有幫助，歡迎用銀行轉帳或 LINE Pay [請 Tony 喝一杯咖啡](https://tonykfr1234.github.io/TalkBridge/donate.html)，你會收到專屬的感謝影片和你的贊助編號；人數只計算 Tony 確認收到的款項。每一版的更新說明可以在 App 的「關於」分頁、[GitHub Releases](https://github.com/tonykfr1234/TalkBridge/releases) 和 [CHANGELOG.md](CHANGELOG.md) 查看。
 
 ## 授權
 

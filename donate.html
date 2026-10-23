@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>請 Tony 喝咖啡</title>
+<meta name="description" content="支持 Tony 的免費 App：銀行轉帳或 LINE Pay 請 Tony 喝一杯咖啡，並收到專屬感謝影片。">
+<meta name="theme-color" content="#0b7480">
+<link rel="icon" href="assets/icon-192.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="donate-page">
+<main class="donate">
+  <header class="donate-head">
+    <img src="assets/icon-192.png" alt="" width="64" height="64">
+    <div>
+      <div class="eyebrow">支持 Tony 的 App</div>
+      <h1 id="d-title">請 Tony 喝一杯咖啡</h1>
+      <p class="lede" id="d-note"></p>
+    </div>
+  </header>
+
+  <section class="card donors-card">
+    <div class="donor-count"><b id="d-count">0</b><span>位朋友已經請 Tony 喝咖啡</span></div>
+    <p class="small muted" id="d-next"></p>
+    <ul class="donor-wall" id="d-wall"></ul>
+  </section>
+
+  <section class="card stack">
+    <h2><span class="step">1</span>選擇金額</h2>
+    <div class="amounts" id="d-amounts" role="group" aria-label="金額"></div>
+    <label class="field" id="d-custom-wrap" hidden>自訂金額（新台幣）<input type="text" inputmode="numeric" id="d-custom" placeholder="例如 200"></label>
+  </section>
+
+  <section class="card stack">
+    <h2><span class="step">2</span>付款</h2>
+    <div class="pay-grid">
+      <div class="pay" id="d-bank">
+        <h3>銀行轉帳</h3>
+        <dl class="kv" id="d-bank-info"></dl>
+        <p class="small muted" id="d-bank-missing" hidden>轉帳帳號設定中，請稍後再來，或改用 LINE Pay。</p>
+      </div>
+      <div class="pay" id="d-line">
+        <h3>LINE Pay</h3>
+        <div id="d-line-info" class="stack"></div>
+        <p class="small muted" id="d-line-missing" hidden>LINE Pay 收款設定中，請稍後再來，或改用銀行轉帳。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card stack" id="d-form-card">
+    <h2><span class="step">3</span>付款完成後，留下你的名字</h2>
+    <form class="stack" id="d-form">
+      <div class="row">
+        <label class="field grow">暱稱（會顯示在贊助名單）<input type="text" id="d-name" maxlength="40" required autocomplete="nickname" placeholder="例如：小美"></label>
+        <label class="field">付款方式<select id="d-method"><option value="bank">銀行轉帳</option><option value="line">LINE Pay</option></select></label>
+        <label class="field" id="d-last5-wrap">帳號末五碼（選填）<input type="text" id="d-last5" inputmode="numeric" maxlength="5" placeholder="12345"></label>
+      </div>
+      <label class="field">想對 Tony 說的話（選填）<textarea id="d-message" rows="2" maxlength="200"></textarea></label>
+      <button class="btn primary" type="submit" id="d-submit">我已完成付款，產生感謝影片</button>
+    </form>
+  </section>
+
+  <section class="card stack thanks" id="d-thanks" hidden>
+    <h2 id="d-thanks-title">謝謝你！</h2>
+    <p id="d-thanks-text"></p>
+    <div class="thanks-media">
+      <canvas id="d-canvas" width="720" height="720" aria-label="感謝動畫"></canvas>
+      <video id="d-video" controls playsinline hidden></video>
+    </div>
+    <p class="small muted" id="d-progress">正在製作你的感謝影片…</p>
+    <div class="row" id="d-actions" hidden>
+      <button class="btn primary" id="d-dl-video">下載感謝影片</button>
+      <button class="btn" id="d-dl-image">下載感謝圖片</button>
+      <button class="btn" id="d-share">分享影片</button>
+    </div>
+    <div class="notify stack">
+      <b>最後一步：通知 Tony 確認入帳</b>
+      <p class="small muted">Tony 確認收到後，會把你加進贊助名單，人數也會更新。</p>
+      <pre class="notify-text" id="d-notify"></pre>
+      <div class="row">
+        <a class="btn primary" id="d-notify-line" target="_blank" rel="noopener">用 LINE 傳給 Tony</a>
+        <button class="btn" id="d-notify-copy">複製訊息</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="donate-foot small muted">
+    <span id="d-credit">Build by Tony · 2026 年製作</span>
+    <span>·</span>
+    <a href="./#about">回到 TalkBridge</a>
+    <span>·</span>
+    <a href="https://github.com/tonykfr1234/TalkBridge" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="js/donate.js"></script>
+</body>
+</html>

@@ -26,6 +26,10 @@ The app stores each AI key only in the viewer's own browser (`localStorage`) and
 | Text read aloud | OpenAI text-to-speech or ElevenLabs when chosen, otherwise the device's own voices |
 | Transcript sent for AI minutes | The chosen AI provider (DeepSeek, OpenAI or Anthropic), with the user's own key |
 
+## Donation details
+
+`donate.json` holds the bank account and LINE Pay details shown on the public donation page; they are public by design. `donors.json` lists only supporters' chosen nicknames and messages, never amounts or account numbers. The thank-you clip is made in the supporter's browser; nothing is uploaded.
+
 ## Reporting a vulnerability
 
 Open a GitHub issue without sensitive details and ask for a private contact, or use GitHub's private vulnerability reporting if enabled. Do not include real keys, recordings or transcripts in reports.

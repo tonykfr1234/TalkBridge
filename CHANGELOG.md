@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-23 · 1.5.0
+
+- New 關於 (About) tab: version, "Build by Tony · 2026 年製作", links to the website, the Android download and GitHub, the confirmed supporter count, and release notes for every version, read from GitHub so even an older installed app shows the latest progress.
+- 新增「關於」分頁：版本、「Build by Tony · 2026 年製作」、網頁與 Android 下載連結、贊助人數，以及每一版的更新說明（直接讀取 GitHub 最新內容）。
+
+- 請 Tony 喝咖啡 page (donate.html): choose an amount, pay by bank transfer or LINE Pay (details in donate.json), then get a personal thank-you clip with a chime and your supporter number to download or share, plus a ready-made LINE message so Tony can confirm the payment. Only payments Tony confirms are counted (donors.json, scripts/add_donor.py).
+- 新增「請 Tony 喝咖啡」頁：選金額、銀行轉帳或 LINE Pay，完成後產生專屬感謝影片（含音效與第幾位贊助者），並可用 LINE 通知 Tony 確認入帳；人數只計算 Tony 確認收到的款項。
+
+- GitHub Releases now carry each version's release notes in Chinese and English, the maker credit and the coffee link. docs/APP_STANDARD.zh-TW.md defines the same About, release-note and support conventions for all of Tony's apps.
+- GitHub Release 自動附上中英更新說明、製作者與贊助連結；新增所有 App 共用的「關於／更新說明／贊助」規範。
+
 ## 2026-10-22 · 1.4.1
 
 - Documentation media: `npm run demo` drives the real app (scripted speech, sample translations, mocked AI, three synthetic voices for the meeting) and writes ten screenshots, a 90-second H.264 MP4 walkthrough and a GIF preview with bilingual captions. The README has a Demo section in the same format as the other repositories.

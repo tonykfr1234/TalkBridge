@@ -53,7 +53,8 @@ jobs:
         run: |
           V="$(node -p "require('../package.json').version").${{ github.run_number }}"
           cp app/build/outputs/apk/release/app-release.apk TalkBridge.apk
-          NOTE="自動建置自 ${GITHUB_SHA::7}。下載 TalkBridge.apk 安裝；App 內也會提示更新。"
-          if [ "$SIGNING" = "debug" ]; then NOTE="$NOTE（暫時簽章：更新前需先解除安裝舊版，詳見 docs/ANDROID.zh-TW.md）"; fi
-          gh release create "v$V" TalkBridge.apk --title "TalkBridge $V" --notes "$NOTE" --target "$GITHUB_SHA"
+          node ../scripts/release_notes.mjs "$SIGNING" > notes.md
+          echo "" >> notes.md
+          echo "<sub>自動建置自 ${GITHUB_SHA::7}</sub>" >> notes.md
+          gh release create "v$V" TalkBridge.apk --title "TalkBridge $V" --notes-file notes.md --target "$GITHUB_SHA"
           echo "Published v$V" >> "$GITHUB_STEP_SUMMARY"

@@ -45,3 +45,5 @@ TalkBridge는 휴대폰이나 노트북을 휴대용 통역사로 바꿉니다. 
 ## 라이선스
 
 MIT © 2026 Tony Hsu and contributors.
+
+Build by Tony · 2026 年製作 · ☕ [Buy Tony a coffee](https://tonykfr1234.github.io/TalkBridge/donate.html)

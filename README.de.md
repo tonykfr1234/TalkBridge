@@ -45,3 +45,5 @@ Ausführliche Dokumentation im <a href="README.md">englischen README</a>.
 ## Lizenz
 
 MIT © 2026 Tony Hsu and contributors.
+
+Build by Tony · 2026 年製作 · ☕ [Buy Tony a coffee](https://tonykfr1234.github.io/TalkBridge/donate.html)

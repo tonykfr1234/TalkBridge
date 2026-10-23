@@ -25,7 +25,7 @@ jobs:
       - name: Collect the static app
         run: |
           mkdir -p _site
-          cp -r index.html manifest.webmanifest sw.js css js assets _site/
+          cp -r index.html donate.html donate.json donors.json CHANGELOG.md manifest.webmanifest sw.js css js assets _site/
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

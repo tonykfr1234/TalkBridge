@@ -45,3 +45,5 @@ Tài liệu đầy đủ ở <a href="README.md">README tiếng Anh</a>.
 ## Giấy phép
 
 MIT © 2026 Tony Hsu and contributors.
+
+Build by Tony · 2026 年製作 · ☕ [Buy Tony a coffee](https://tonykfr1234.github.io/TalkBridge/donate.html)

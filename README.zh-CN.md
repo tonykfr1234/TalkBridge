@@ -45,3 +45,5 @@ TalkBridge 把手机或笔记本变成随身口译员：你说中文，它用英
 ## 许可证
 
 MIT © 2026 Tony Hsu and contributors.
+
+Build by Tony · 2026 年製作 · ☕ [Buy Tony a coffee](https://tonykfr1234.github.io/TalkBridge/donate.html)

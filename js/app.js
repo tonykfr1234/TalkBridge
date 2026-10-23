@@ -6,10 +6,11 @@ import { initMeet, meetingBusy } from './views/meet.js';
 import { initLearn, leaveLearn } from './views/learn.js';
 import { initSettings } from './views/settings.js';
 import { initVoice } from './views/voice.js';
+import { initAbout, enterAbout } from './views/about.js';
 import { canRecognize } from './speech.js';
 import { $, $$, toast } from './ui.js';
 
-const VIEWS = ['talk', 'subs', 'meet', 'learn', 'settings'];
+const VIEWS = ['talk', 'subs', 'meet', 'learn', 'settings', 'about'];
 const leave = { talk: leaveTalk, subs: leaveSubs, learn: leaveLearn };
 let current = 'talk';
 
@@ -17,13 +18,14 @@ function show(name) {
   if (!VIEWS.includes(name)) name = 'talk';
   if (name === current && !$('#view-' + name).hidden) return;
   if (leave[current]) leave[current]();
-  if (meetingBusy() && name !== 'meet' && name !== 'settings') {
+  if (meetingBusy() && !['meet', 'settings', 'about'].includes(name)) {
     toast('會議記錄進行中，語音辨識同時只能用在一個地方；切回「會議」可繼續看逐字稿。', 5000);
   }
   current = name;
   for (const v of VIEWS) $('#view-' + v).hidden = v !== name;
   $$('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.view === name)));
   try { history.replaceState(null, '', '#' + name); } catch { /* sandboxed frame */ }
+  if (name === 'about') enterAbout();
   $('#main').scrollTop = 0;
 }
 
@@ -34,6 +36,7 @@ function boot() {
   initSubs();
   initMeet();
   initLearn();
+  initAbout();
   $$('.tab').forEach((t) => t.addEventListener('click', () => show(t.dataset.view)));
   const start = (location.hash || '').slice(1);
   current = '';

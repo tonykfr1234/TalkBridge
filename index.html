@@ -32,6 +32,8 @@
   <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></symbol>
   <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></symbol>
+  <symbol id="i-cup" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h2a2.5 2.5 0 0 1 0 5h-2M8 3c0 1.5 1.5 1.5 1.5 3M12 3c0 1.5 1.5 1.5 1.5 3"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
 </svg>
 
@@ -44,6 +46,7 @@
     <button class="tab" role="tab" data-view="learn" aria-selected="false"><svg><use href="#i-learn"/></svg>練習</button>
     <div class="spacer"></div>
     <button class="tab" role="tab" data-view="settings" aria-selected="false"><svg><use href="#i-set"/></svg>設定</button>
+    <button class="tab" role="tab" data-view="about" aria-selected="false"><svg><use href="#i-info"/></svg>關於</button>
   </nav>
 
   <main id="main">
@@ -390,6 +393,30 @@
           <p class="small muted">語音辨識使用瀏覽器內建功能：Chrome、Edge（電腦與 Android）效果最好；iPhone 請用 Safari 並開啟「聽寫」。</p>
           <button class="btn" id="install-btn" hidden>安裝到主畫面</button>
         </div>
+      </div>
+    </section>
+    <!-- ===== 關於 ===== -->
+    <section class="view" id="view-about" hidden>
+      <div class="view-head"><div><div class="eyebrow">關於</div><h1>語橋 TalkBridge</h1>
+        <p class="lede">即時口譯、翻譯字幕、會議記錄與語言練習。網頁版與 Android App 共用同一套程式，每次更新都會發佈在 GitHub。</p></div></div>
+      <div class="about-grid">
+        <div class="card stack about-id">
+          <div class="row"><img src="assets/icon-192.png" alt="" width="56" height="56" style="border-radius:14px"><div><b style="font-size:18px">語橋 TalkBridge</b><div class="muted small" id="about-version"></div></div></div>
+          <p class="credit" id="about-credit">Build by Tony · 2026 年製作</p>
+          <p class="small update-note" id="about-update" hidden></p>
+          <div class="row" id="about-links"></div>
+        </div>
+        <div class="card stack coffee-card">
+          <h2 class="row"><svg class="cup"><use href="#i-cup"/></svg>請 Tony 喝一杯咖啡</h2>
+          <p class="small">所有功能免費使用。如果 TalkBridge 對你有幫助，可以用銀行轉帳或 LINE Pay 請 Tony 喝杯咖啡，還會收到專屬的感謝影片。</p>
+          <p class="small muted" id="about-donors"></p>
+          <a class="btn primary" id="about-coffee" href="donate.html" target="_blank" rel="noopener"><svg><use href="#i-cup"/></svg>請 Tony 喝咖啡</a>
+        </div>
+      </div>
+      <div class="card stack" style="margin-top:16px">
+        <h2>更新進度</h2>
+        <p class="small muted">每一版的修改說明，最新內容直接讀取自 GitHub。</p>
+        <div id="about-notes" class="notes-list"><p class="muted">讀取中…</p></div>
       </div>
     </section>
   </main>

@@ -68,7 +68,7 @@ kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarg
 // on every build, so a web fix is in the next APK automatically.
 val copyWebAssets by tasks.registering(Copy::class) {
     from(rootProject.file("..")) {
-        include("index.html", "manifest.webmanifest", "css/**", "js/**", "assets/**")
+        include("index.html", "donate.html", "donate.json", "donors.json", "CHANGELOG.md", "manifest.webmanifest", "css/**", "js/**", "assets/**")
     }
     into(layout.buildDirectory.dir("generated/webassets/www"))
 }

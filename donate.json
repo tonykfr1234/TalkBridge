@@ -1,0 +1,8 @@
+{
+  "title": "請 Tony 喝一杯咖啡",
+  "note": "TalkBridge 與 Tony 的其他 App 都免費使用。如果對你有幫助，歡迎請我喝杯咖啡，讓我繼續改進。",
+  "amounts": [100, 150, 300],
+  "currency": "TWD",
+  "bank": { "name": "", "code": "", "account": "", "holder": "" },
+  "linePay": { "url": "", "id": "", "qr": "" }
+}

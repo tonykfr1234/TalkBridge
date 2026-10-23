@@ -10,6 +10,7 @@
   <a href="https://github.com/tonykfr1234/TalkBridge/releases/latest"><img src="https://img.shields.io/github/v/release/tonykfr1234/TalkBridge?label=Android%20APK&color=0b7480" alt="Android APK"></a>
   <img src="https://img.shields.io/badge/platform-Web%20%7C%20Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS-0b7480" alt="Platforms">
   <img src="https://img.shields.io/badge/languages-22-7a4b9a" alt="22 languages">
+  <a href="https://tonykfr1234.github.io/TalkBridge/donate.html"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftonykfr1234%2FTalkBridge%2Fmain%2Fdonors.json&query=%24.count&label=%E2%98%95%20supporters&color=c4632b" alt="Supporters"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
 </p>
 <p align="center">
@@ -132,6 +133,8 @@ transcript ─► DeepSeek / OpenAI / Claude (your key, JSON) ─► minutes, ow
 
 - [User guide (Traditional Chinese)](docs/USER_GUIDE.zh-TW.md)
 - [Android app (Traditional Chinese)](docs/ANDROID.zh-TW.md)
+- [App standard: About, release notes, support (Traditional Chinese)](docs/APP_STANDARD.zh-TW.md)
+- [Donations setup (Traditional Chinese)](docs/DONATIONS.zh-TW.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
@@ -153,6 +156,11 @@ No build step: the app is plain ES modules.
 ## Security
 
 Never commit API keys. See [SECURITY.md](SECURITY.md).
+
+<a id="support"></a>
+## Support
+
+**Build by Tony · 2026 年製作.** TalkBridge is free. If it helps you, you can [buy Tony a coffee](https://tonykfr1234.github.io/TalkBridge/donate.html) by bank transfer or LINE Pay and get a personal thank-you clip with your supporter number. Only payments Tony has confirmed are counted. Release notes for every version are in the app's 關於 tab, on [GitHub Releases](https://github.com/tonykfr1234/TalkBridge/releases) and in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

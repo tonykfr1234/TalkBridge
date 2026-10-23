@@ -5,7 +5,7 @@
 // synthetic voices (ffmpeg flite) into the fake microphone so speaker
 // separation runs on real audio. No account, key or network service is used.
 // Run: npm run demo   (needs playwright and ffmpeg with libx264 and libflite)
-import { mkdtemp, readdir, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -91,8 +91,19 @@ const CAPTION_CSS = `#demo-cap{position:fixed;left:50%;transform:translateX(-50%
 background:rgba(10,18,26,.88);color:#fff;border-radius:14px;padding:10px 20px;text-align:center;font:600 20px/1.45 "Noto Sans TC","WenQuanYi Zen Hei",sans-serif;
 box-shadow:0 6px 24px rgba(0,0,0,.3)}#demo-cap small{display:block;font-weight:400;font-size:15px;color:#c9d6de}`;
 
+// Example payment details for the demo only (the real ones live in donate.json).
+const DEMO_DONATE = { title: '請 Tony 喝一杯咖啡', note: 'TalkBridge 與 Tony 的其他 App 都免費使用。如果對你有幫助，歡迎請我喝杯咖啡，讓我繼續改進。（示範畫面，帳號為範例）', amounts: [100, 150, 300], bank: { name: '範例銀行', code: '000', account: '0001-2345-6789', holder: 'Tony（範例）' }, linePay: { url: 'https://line.me/', id: 'tony-example' } };
+const DEMO_DONORS = { count: 2, donors: [{ n: 1, name: '阿明', date: '2026-10-22' }, { n: 2, name: 'Amy', date: '2026-10-23' }] };
+
 async function routes(context) {
   await context.route('https://fonts.**', (r) => r.abort());
+  await context.route('https://raw.githubusercontent.com/**', async (route) => {
+    const f = new URL(route.request().url()).pathname.split('/').pop();
+    if (f === 'donate.json') return route.fulfill({ contentType: 'application/json', body: JSON.stringify(DEMO_DONATE) });
+    if (f === 'donors.json') return route.fulfill({ contentType: 'application/json', body: JSON.stringify(DEMO_DONORS) });
+    if (f === 'CHANGELOG.md') return route.fulfill({ contentType: 'text/markdown', body: await readFile(join(ROOT, 'CHANGELOG.md'), 'utf8') });
+    return route.abort();
+  });
   await context.route('https://translate.googleapis.com/**', (route) => {
     const u = new URL(route.request().url());
     const q = u.searchParams.get('q'), tl = u.searchParams.get('tl');
@@ -108,7 +119,7 @@ const browser = await chromium.launch({
   args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${audio}`, '--autoplay-policy=no-user-gesture-required'],
 });
 const context = await browser.newContext({
-  viewport: { width: W, height: H }, deviceScaleFactor: 1, permissions: ['microphone'],
+  viewport: { width: W, height: H }, deviceScaleFactor: 1, permissions: ['microphone'], acceptDownloads: true,
   recordVideo: { dir: work, size: { width: W, height: H } },
 });
 await context.addInitScript(FAKE_SPEECH);
@@ -245,8 +256,41 @@ await page.evaluate(() => document.querySelector('#clone-card').scrollIntoView({
 await wait(2500);
 await still('settings', null, { top: true });
 await still('voice', '#clone-card');
+
+// 7. About
+await page.click('.tab[data-view=about]');
+await caption('關於：版本、Build by Tony・2026 年製作、每一版的更新說明', 'About: version, maker credit and release notes for every version');
+await page.waitForSelector('#about-notes .release');
+await wait(2600);
+await still('about', null, { top: true });
+
+// 8. Buy Tony a coffee → personal thank-you clip
+await caption('請 Tony 喝咖啡：銀行轉帳或 LINE Pay（示範畫面，帳號為範例）', 'Buy Tony a coffee by bank transfer or LINE Pay (example details)');
+await page.goto(base + 'donate.html');
+await page.waitForSelector('#d-count:text("2")');
+await caption('請 Tony 喝咖啡：銀行轉帳或 LINE Pay（示範畫面，帳號為範例）', 'Buy Tony a coffee by bank transfer or LINE Pay (example details)');
+await wait(1800);
+await still('donate');
+await page.click('.amount:has-text("NT$150")');
+await page.evaluate(() => document.querySelector('#d-form-card').scrollIntoView({ behavior: 'smooth', block: 'center' }));
+await wait(900);
+await page.fill('#d-name', '小美');
+await page.fill('#d-message', '口譯很好用，謝謝！');
+await caption('付款後留下暱稱，立刻產生專屬感謝影片：你是第幾位贊助者', 'Leave a nickname after paying and get a personal thank-you clip with your supporter number');
+await wait(900);
+const clipDl = page.waitForEvent('download');
+await page.click('#d-submit');
+await page.waitForSelector('#d-video:not([hidden])', { timeout: 20000 });
+await wait(800);
+await still('thanks', '#d-thanks');
+await page.click('#d-dl-video');
+const clipPath = join(work, 'thanks-clip.webm');
+await (await clipDl).saveAs(clipPath);
+await caption('最後用 LINE 通知 Tony，確認入帳後加入贊助名單', 'Finally tell Tony on LINE; confirmed supporters join the list');
+await page.evaluate(() => document.querySelector('.notify').scrollIntoView({ behavior: 'smooth', block: 'center' }));
+await wait(2800);
 await caption('網頁版與 Android App 共用同一套程式，推送到 GitHub 自動更新', 'The website and the Android app share one codebase and update from GitHub');
-await wait(2500);
+await wait(2000);
 
 const seconds = (Date.now() - t0) / 1000;
 await page.close();
@@ -291,7 +335,7 @@ server.close();
 if (errors.length) { console.error(errors); process.exit(1); }
 
 // Video: Playwright's WebM to H.264 MP4 and a GIF preview.
-const webm = (await readdir(work)).filter((f) => f.endsWith('.webm')).map((f) => join(work, f));
+const webm = (await readdir(work)).filter((f) => f.endsWith('.webm') && f !== 'thanks-clip.webm').map((f) => join(work, f));
 let longest = webm[0];
 for (const f of webm) if ((await stat(f)).size > (await stat(longest)).size) longest = f;
 const ff = (args) => execFileSync('ffmpeg', ['-nostdin', '-loglevel', 'error', '-y', ...args]);
@@ -301,6 +345,8 @@ const palette = join(work, 'palette.png');
 const gifFilter = 'fps=6,scale=800:-1:flags=lanczos';
 ff(['-i', mp4, '-vf', `${gifFilter},palettegen=max_colors=96:stats_mode=diff`, palette]);
 ff(['-i', mp4, '-i', palette, '-lavfi', `${gifFilter} [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`, join(OUT, 'talkbridge-demo.gif')]);
+// The thank-you clip a supporter receives, as MP4 with its chime.
+ff(['-i', clipPath, '-c:v', 'libx264', '-preset', 'slow', '-crf', '28', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', join(OUT, 'thanks-clip.mp4')]);
 await rm(work, { recursive: true, force: true });
 
 for (const f of (await readdir(OUT)).sort()) {

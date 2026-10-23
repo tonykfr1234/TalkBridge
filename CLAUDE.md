@@ -12,3 +12,5 @@
 - 不要把任何 API 金鑰、簽章金鑰（`.jks`）或 `keystore.properties` 放進 repository。
 - 使用者介面文字用繁體中文；README 有 12 種語言，英文與繁中版要保持一致。
 - GitHub 上的檔案規格參考使用者其他 repository（例如 tonykfr1234/superlive-ai-monitor、Android_wifi-spectrum）：12 種語言 README、CHANGELOG 中英對照、CONTRIBUTING、SECURITY、MIT LICENSE、SHA256SUMS.txt、docs/ 使用說明、docs/media 示範媒體、GitHub Actions 安全掃描與測試。
+- **所有 App 統一的「關於」與贊助**（見 `docs/APP_STANDARD.zh-TW.md`）：每個 App 都要有「關於」頁（版本、Build by Tony · 2026 年製作、下載連結、從 GitHub 讀取的最新更新說明、請 Tony 喝咖啡按鈕與贊助人數）；每個 GitHub Release 都要附上中英更新說明、製作者與贊助連結；以後做任何新 App 都照這份規範。
+- 使用者說「確認贊助：暱稱…」時，執行 `python3 scripts/add_donor.py "暱稱" --message "留言"` 並照上面的流程推上 GitHub。收款資訊放在 `donate.json`。
