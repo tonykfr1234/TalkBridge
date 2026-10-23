@@ -1,6 +1,6 @@
 d7172d89e842aa804f3c2b1077c4f618714b47b3dd8c071aaa77cb85a8722c2f  ./.gitattributes
 f88beaa7e1f3433927a700053f8ecd5e0ef54ed453ce4aacd741b2d9a274d127  ./.github/workflows/android.yml
-35467adfc3787372b0ba8b028c8a9041f08009f84833273b74cfbcd8d230e7e1  ./.github/workflows/ci.yml
+5a09ee60127199acf95ad5a247b4c891a317c7cb8a408a48f15246b3378a0d2f  ./.github/workflows/ci.yml
 ece5fd554d9d2c1f70ef3d452b7438f9f6e9143a6d65ee1278cc9ba67ca43be6  ./.github/workflows/pages.yml
 e96ccd0ca653bbbc85e6366a467481080d6544d982be8c8316b1208278740f34  ./.gitignore
 c9bbbe59d0b899433a88b201517d81c2fbb738d3e506316fe1b886fc6be3fccc  ./CHANGELOG.md
