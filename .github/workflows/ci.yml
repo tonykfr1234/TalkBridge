@@ -31,9 +31,9 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Unit tests
         run: npm test
+      - name: Install ffmpeg with flite voices (also checks the thank-you clip)
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Browser test (simulated speech, mocked translation and AI providers)
         run: npm run test:e2e
-      - name: Install ffmpeg with flite voices
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Automatic speaker separation with real synthetic voices
         run: npm run test:voices
